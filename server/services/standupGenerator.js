@@ -26,7 +26,7 @@ const deduplicateCommits = (commits) => {
   
     if (reviews.length > 0) {
       const reviewedRepos = [...new Set(reviews.map((r) => r.repo.split('/')[1]))];
-      yesterdayLines.push(`• Reviewed PRs in: ${reviewedRepos.join(', ')}`);
+      yesterdayLines.push(`Reviewed PRs in: ${reviewedRepos.join(', ')}`);
     }
   
     const yesterday =
