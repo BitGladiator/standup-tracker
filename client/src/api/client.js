@@ -20,3 +20,10 @@ const apiFetch = async (path, options = {}) => {
 
 export const getMe = () => apiFetch('/auth/me');
 export const logout = () => apiFetch('/auth/logout', { method: 'POST' });
+
+
+export const generateStandup = () => apiFetch('/standup/generate');
+export const getTodayStandup = () => apiFetch('/standup/today');
+export const saveStandup = (data) =>
+  apiFetch('/standup', { method: 'POST', body: JSON.stringify(data) });
+export const getStandupHistory = () => apiFetch('/standup/history');
