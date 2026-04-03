@@ -3,6 +3,7 @@ import { useAuth } from './hooks/useAuth.jsx';
 import Login from './pages/Login.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Standup from './pages/Standup.jsx';
+import Focus from './pages/Focus.jsx';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -13,31 +14,14 @@ const ProtectedRoute = ({ children }) => {
 
 const App = () => {
   const { user, loading } = useAuth();
-
   if (loading) return <div style={{ padding: 32 }}>Loading...</div>;
 
   return (
     <Routes>
-      <Route
-        path="/login"
-        element={user ? <Navigate to="/dashboard" replace /> : <Login />}
-      />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/standup"
-        element={
-          <ProtectedRoute>
-            <Standup />
-          </ProtectedRoute>
-        }
-      />
+      <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
+      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="/standup" element={<ProtectedRoute><Standup /></ProtectedRoute>} />
+      <Route path="/focus" element={<ProtectedRoute><Focus /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to={user ? '/dashboard' : '/login'} replace />} />
     </Routes>
   );
