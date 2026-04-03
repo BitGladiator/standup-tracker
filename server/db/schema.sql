@@ -1,4 +1,4 @@
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   github_id VARCHAR(50) UNIQUE NOT NULL,
   username VARCHAR(100) NOT NULL,
@@ -8,7 +8,7 @@ CREATE TABLE users (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE standups (
+CREATE TABLE IF NOT EXISTS standups (
   id SERIAL PRIMARY KEY,
   user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
   date DATE NOT NULL DEFAULT CURRENT_DATE,
@@ -20,7 +20,7 @@ CREATE TABLE standups (
   UNIQUE(user_id, date)
 );
 
-CREATE TABLE focus_sessions (
+CREATE TABLE IF NOT EXISTS focus_sessions (
   id SERIAL PRIMARY KEY,
   user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
   label VARCHAR(255),
@@ -31,12 +31,11 @@ CREATE TABLE focus_sessions (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE github_activity (
+CREATE TABLE IF NOT EXISTS github_activity (
   id SERIAL PRIMARY KEY,
   user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
   fetched_at TIMESTAMP DEFAULT NOW(),
   commits JSONB,
   prs JSONB,
-  reviews JSONB,
-  UNIQUE(user_id, fetched_at::DATE)
+  reviews JSONB
 );
