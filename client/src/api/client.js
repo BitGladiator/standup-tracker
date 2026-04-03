@@ -18,6 +18,7 @@ const apiFetch = async (path, options = {}) => {
   return res.json();
 };
 
+
 export const getMe = () => apiFetch('/auth/me');
 export const logout = () => apiFetch('/auth/logout', { method: 'POST' });
 
@@ -27,3 +28,9 @@ export const getTodayStandup = () => apiFetch('/standup/today');
 export const saveStandup = (data) =>
   apiFetch('/standup', { method: 'POST', body: JSON.stringify(data) });
 export const getStandupHistory = () => apiFetch('/standup/history');
+
+
+export const saveSession = (data) =>
+  apiFetch('/sessions', { method: 'POST', body: JSON.stringify(data) });
+export const getSessionStats = () => apiFetch('/sessions/stats');
+export const getTodaySessions = () => apiFetch('/sessions/today');
