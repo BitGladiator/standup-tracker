@@ -2,6 +2,7 @@ const express = require('express');
 const authenticate = require('../middleware/authenticate');
 const { fetchGithubActivity } = require('../services/githubService');
 const { generateStandupDraft } = require('../services/standupGenerator');
+const { sendStandupToSlack } = require('../services/slackService');
 const db = require('../db');
 
 const router = express.Router();
@@ -22,8 +23,7 @@ router.get('/generate', authenticate, async (req, res) => {
 router.get('/today', authenticate, async (req, res) => {
   try {
     const { rows } = await db.query(
-      `SELECT * FROM standups
-       WHERE user_id = $1 AND date = CURRENT_DATE`,
+      'SELECT * FROM standups WHERE user_id = $1 AND date = CURRENT_DATE',
       [req.userId]
     );
     res.json(rows[0] || null);
@@ -34,7 +34,7 @@ router.get('/today', authenticate, async (req, res) => {
 
 
 router.post('/', authenticate, async (req, res) => {
-  const { yesterday, today, blockers, auto_generated } = req.body;
+  const { yesterday, today, blockers, auto_generated, send_to_slack } = req.body;
 
   try {
     const { rows } = await db.query(
@@ -45,12 +45,34 @@ router.post('/', authenticate, async (req, res) => {
        RETURNING *`,
       [req.userId, yesterday, today, blockers, auto_generated || false]
     );
-    res.json(rows[0]);
+
+    const saved = rows[0];
+
+   
+    if (send_to_slack) {
+      const { rows: userRows } = await db.query(
+        'SELECT username, slack_webhook_url FROM users WHERE id = $1',
+        [req.userId]
+      );
+      const user = userRows[0];
+
+      if (user?.slack_webhook_url) {
+        try {
+          await sendStandupToSlack(user.slack_webhook_url, saved, user.username);
+          saved.slack_sent = true;
+        } catch (slackErr) {
+          console.error('Slack send failed:', slackErr);
+          saved.slack_sent = false;
+          saved.slack_error = 'Failed to send to Slack';
+        }
+      }
+    }
+
+    res.json(saved);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 router.get('/history', authenticate, async (req, res) => {
   try {
