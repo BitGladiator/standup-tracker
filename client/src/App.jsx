@@ -4,6 +4,8 @@ import Login from './pages/Login.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Standup from './pages/Standup.jsx';
 import Focus from './pages/Focus.jsx';
+import History from './pages/History.jsx';
+import Settings from './pages/Settings.jsx';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -22,6 +24,8 @@ const App = () => {
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/standup" element={<ProtectedRoute><Standup /></ProtectedRoute>} />
       <Route path="/focus" element={<ProtectedRoute><Focus /></ProtectedRoute>} />
+      <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
+      <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to={user ? '/dashboard' : '/login'} replace />} />
     </Routes>
   );
