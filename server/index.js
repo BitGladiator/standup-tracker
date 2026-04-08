@@ -8,15 +8,13 @@ const { Server } = require('socket.io');
 const authRoutes = require('./routes/auth');
 const standupRoutes = require('./routes/standup');
 const sessionRoutes = require('./routes/sessions');
+const settingsRoutes = require('./routes/settings');
 
 const app = express();
 const httpServer = createServer(app);
 
 const io = new Server(httpServer, {
-  cors: {
-    origin: process.env.CLIENT_URL,
-    credentials: true,
-  },
+  cors: { origin: process.env.CLIENT_URL, credentials: true },
 });
 
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
@@ -28,8 +26,9 @@ app.set('io', io);
 app.use('/api/auth', authRoutes);
 app.use('/api/standup', standupRoutes);
 app.use('/api/sessions', sessionRoutes);
+app.use('/api/settings', settingsRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5500;
 httpServer.listen(PORT, () => console.log(`Server running on port ${PORT}`));
