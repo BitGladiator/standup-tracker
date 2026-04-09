@@ -34,3 +34,6 @@ export const saveSession = (data) =>
   apiFetch('/sessions', { method: 'POST', body: JSON.stringify(data) });
 export const getSessionStats = () => apiFetch('/sessions/stats');
 export const getTodaySessions = () => apiFetch('/sessions/today');
+export const getSettings = () => apiFetch('/settings');
+export const saveSettings = (data) =>
+  apiFetch('/settings', { method: 'PUT', body: JSON.stringify(data) });
