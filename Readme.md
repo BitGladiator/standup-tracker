@@ -4,4 +4,4 @@
 ---
 
 ## GitHub OAuth Flow
-<img src="images/Github.jpg" width="700" />
+<img src="images/GitHub.jpg" width="700" />
