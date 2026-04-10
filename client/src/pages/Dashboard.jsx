@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
-import { logout, getSessionStats } from '../api/client.js';
+import { logout, getSessionStats, triggerPRCheck } from '../api/client.js';
+import NotificationBell from '../components/NotificationBell.jsx';
 
 const Dashboard = () => {
   const { user, setUser } = useAuth();
@@ -39,11 +40,13 @@ const Dashboard = () => {
   return (
     <div style={{ maxWidth: '720px', margin: '0 auto', padding: '40px 24px' }}>
 
+     
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
         <h1 style={{ fontSize: '22px', fontWeight: '600', color: '#1a202c', margin: 0 }}>
           Standup Tracker
         </h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <NotificationBell userId={user?.id} />
           <button onClick={() => navigate('/settings')}
             style={{ fontSize: '13px', color: '#718096', background: 'none', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }}>
             Settings
@@ -58,6 +61,7 @@ const Dashboard = () => {
         </div>
       </div>
 
+      
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '32px' }}>
         <div onClick={() => navigate('/standup')}
           style={{ background: '#3182CE', borderRadius: '12px', padding: '24px', cursor: 'pointer', color: '#fff' }}>
@@ -74,6 +78,7 @@ const Dashboard = () => {
         </div>
       </div>
 
+   
       {stats && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '32px' }}>
           <StatCard label="Total focus time"
@@ -83,7 +88,8 @@ const Dashboard = () => {
         </div>
       )}
 
-      <div style={{ background: '#F7FAFC', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px' }}>
+     
+      <div style={{ background: '#F7FAFC', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px', marginBottom: '24px' }}>
         <h3 style={{ fontSize: '13px', fontWeight: '600', color: '#4a5568', margin: '0 0 16px' }}>
           Focus time this week
         </h3>
@@ -102,6 +108,14 @@ const Dashboard = () => {
           ))}
         </div>
       </div>
+
+      
+      <button
+        onClick={() => triggerPRCheck().then(() => alert('PR check triggered! Check your notifications.'))}
+        style={{ fontSize: '12px', color: '#a0aec0', background: 'none', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }}
+      >
+        Trigger PR check (testing)
+      </button>
 
     </div>
   );
