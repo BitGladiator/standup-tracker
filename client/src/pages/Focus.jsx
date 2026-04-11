@@ -28,11 +28,12 @@ const Focus = () => {
   }, []);
 
   const isWorking = phase === 'work';
-  const isBreak = phase === 'break';
-  const isIdle = phase === 'idle';
+const isBreak = phase === 'break';
+const isIdle = phase === 'idle';
+const isPaused = phase === 'paused';
 
-  const phaseColor = isWorking ? '#3182CE' : isBreak ? '#38A169' : '#718096';
-  const phaseLabel = isWorking ? 'Focus time' : isBreak ? 'Take a break' : 'Ready to focus?';
+const phaseColor = isWorking ? '#3182CE' : isBreak ? '#38A169' : '#718096';
+const phaseLabel = isWorking ? 'Focus time' : isBreak ? 'Take a break' : isPaused ? 'Paused' : 'Ready to focus?';
 
   const totalMinutesToday = sessions.reduce((sum, s) => sum + s.duration_minutes, 0);
 
@@ -132,78 +133,80 @@ const Focus = () => {
 
       
       <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginBottom: '40px' }}>
-        {isIdle && (
-          <button
-            onClick={start}
-            style={{
-              padding: '12px 32px',
-              fontSize: '15px',
-              fontWeight: '600',
-              background: '#3182CE',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-            }}
-          >
-            Start focus
-          </button>
-        )}
 
-        {isWorking && (
-          <button
-            onClick={pause}
-            style={{
-              padding: '12px 32px',
-              fontSize: '15px',
-              fontWeight: '600',
-              background: '#fff',
-              color: '#1a202c',
-              border: '1px solid #e2e8f0',
-              borderRadius: '8px',
-              cursor: 'pointer',
-            }}
-          >
-            Pause
-          </button>
-        )}
+  {(isIdle || isPaused) && (
+    <button
+      onClick={start}
+      style={{
+        padding: '12px 32px',
+        fontSize: '15px',
+        fontWeight: '600',
+        background: '#3182CE',
+        color: '#fff',
+        border: 'none',
+        borderRadius: '8px',
+        cursor: 'pointer',
+      }}
+    >
+      {isPaused ? 'Resume' : 'Start focus'}
+    </button>
+  )}
 
-        {isBreak && (
-          <button
-            onClick={skipBreak}
-            style={{
-              padding: '12px 32px',
-              fontSize: '15px',
-              fontWeight: '600',
-              background: '#38A169',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-            }}
-          >
-            Skip break
-          </button>
-        )}
+  {isWorking && (
+    <button
+      onClick={pause}
+      style={{
+        padding: '12px 32px',
+        fontSize: '15px',
+        fontWeight: '600',
+        background: '#fff',
+        color: '#1a202c',
+        border: '1px solid #e2e8f0',
+        borderRadius: '8px',
+        cursor: 'pointer',
+      }}
+    >
+      Pause
+    </button>
+  )}
 
-        {(isWorking || isBreak) && (
-          <button
-            onClick={reset}
-            style={{
-              padding: '12px 20px',
-              fontSize: '15px',
-              fontWeight: '600',
-              background: '#fff',
-              color: '#718096',
-              border: '1px solid #e2e8f0',
-              borderRadius: '8px',
-              cursor: 'pointer',
-            }}
-          >
-            Reset
-          </button>
-        )}
-      </div>
+  {isBreak && (
+    <button
+      onClick={skipBreak}
+      style={{
+        padding: '12px 32px',
+        fontSize: '15px',
+        fontWeight: '600',
+        background: '#38A169',
+        color: '#fff',
+        border: 'none',
+        borderRadius: '8px',
+        cursor: 'pointer',
+      }}
+    >
+      Skip break
+    </button>
+  )}
+
+  {(isWorking || isBreak || isPaused) && (
+    <button
+      onClick={reset}
+      style={{
+        padding: '12px 20px',
+        fontSize: '15px',
+        fontWeight: '600',
+        background: '#fff',
+        color: '#718096',
+        border: '1px solid #e2e8f0',
+        borderRadius: '8px',
+        cursor: 'pointer',
+      }}
+    >
+      Reset
+    </button>
+  )}
+
+</div>
 
    
       {sessions.length > 0 && (

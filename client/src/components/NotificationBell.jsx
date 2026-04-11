@@ -38,40 +38,45 @@ const NotificationBell = ({ userId }) => {
 
       {/* Bell button */}
       <button
-        onClick={() => setOpen((o) => !o)}
-        style={{
-          position: 'relative',
-          background: 'none',
-          border: '1px solid #e2e8f0',
-          borderRadius: '8px',
-          padding: '6px 10px',
-          cursor: 'pointer',
-          fontSize: '16px',
-          lineHeight: 1,
-          color: '#4a5568',
-        }}
-      >
-        🔔
-        {unreadCount > 0 && (
-          <span style={{
-            position: 'absolute',
-            top: '-6px',
-            right: '-6px',
-            background: '#E53E3E',
-            color: '#fff',
-            fontSize: '10px',
-            fontWeight: '700',
-            width: '18px',
-            height: '18px',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            {unreadCount > 9 ? '9+' : unreadCount}
-          </span>
-        )}
-      </button>
+  onClick={() => setOpen((o) => !o)}
+  style={{
+    position: 'relative',
+    background: 'none',
+    border: '1px solid #e2e8f0',
+    borderRadius: '8px',
+    padding: '6px 10px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: '#4a5568',
+  }}
+>
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+  </svg>
+  {unreadCount > 0 && (
+    <span style={{
+      position: 'absolute',
+      top: '-6px',
+      right: '-6px',
+      background: '#E53E3E',
+      color: '#fff',
+      fontSize: '10px',
+      fontWeight: '700',
+      width: '18px',
+      height: '18px',
+      borderRadius: '50%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}>
+      {unreadCount > 9 ? '9+' : unreadCount}
+    </span>
+  )}
+</button>
 
       {/* Dropdown panel */}
       {open && (

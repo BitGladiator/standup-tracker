@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { saveSession } from '../api/client';
 
-const WORK_DURATION = 25 * 60;   
-const BREAK_DURATION = 5 * 60;  
+const WORK_DURATION = 25 * 60;
+const BREAK_DURATION = 5 * 60;
 
 const usePomodoro = () => {
-  const [phase, setPhase] = useState('idle');     
+  const [phase, setPhase] = useState('idle');      // idle | work | break | paused
   const [secondsLeft, setSecondsLeft] = useState(WORK_DURATION);
+  const [activePhase, setActivePhase] = useState('work'); // tracks work or break even when paused
   const [pomodoroCount, setPomodoroCount] = useState(0);
   const [label, setLabel] = useState('');
   const [sessions, setSessions] = useState([]);
@@ -41,7 +42,7 @@ const usePomodoro = () => {
   }, [label, pomodoroCount]);
 
   useEffect(() => {
-    if (phase === 'idle' || phase === 'done') {
+    if (phase !== 'work' && phase !== 'break') {
       clearTimer();
       return;
     }
@@ -53,11 +54,13 @@ const usePomodoro = () => {
             const endedAt = new Date();
             persistSession(startedAtRef.current, endedAt, 25);
             setPomodoroCount((c) => c + 1);
+            setActivePhase('break');
             setPhase('break');
             return BREAK_DURATION;
           } else {
-            setPhase('work');
             startedAtRef.current = new Date();
+            setActivePhase('work');
+            setPhase('work');
             return WORK_DURATION;
           }
         }
@@ -68,39 +71,48 @@ const usePomodoro = () => {
     return () => clearTimer();
   }, [phase, persistSession]);
 
+  // Fresh start — only called when idle with no prior session
   const start = () => {
-    startedAtRef.current = new Date();
-    setPhase('work');
-    setSecondsLeft(WORK_DURATION);
+    if (phase === 'paused') {
+      // Resume from where we left off
+      setPhase(activePhase);
+    } else {
+      // Brand new session
+      startedAtRef.current = new Date();
+      setActivePhase('work');
+      setPhase('work');
+      setSecondsLeft(WORK_DURATION);
+    }
   };
 
   const pause = () => {
     clearTimer();
-    setPhase('idle');
+    setPhase('paused'); // separate state — does NOT reset seconds
   };
 
   const reset = () => {
     clearTimer();
     setPhase('idle');
+    setActivePhase('work');
     setSecondsLeft(WORK_DURATION);
     setPomodoroCount(0);
     startedAtRef.current = null;
   };
 
   const skipBreak = () => {
-    setPhase('work');
     startedAtRef.current = new Date();
+    setActivePhase('work');
+    setPhase('work');
     setSecondsLeft(WORK_DURATION);
   };
 
-  // Format seconds as MM:SS
   const formatTime = (secs) => {
     const m = Math.floor(secs / 60).toString().padStart(2, '0');
     const s = (secs % 60).toString().padStart(2, '0');
     return `${m}:${s}`;
   };
 
-  const progress = phase === 'work'
+  const progress = activePhase === 'work'
     ? ((WORK_DURATION - secondsLeft) / WORK_DURATION) * 100
     : ((BREAK_DURATION - secondsLeft) / BREAK_DURATION) * 100;
 
