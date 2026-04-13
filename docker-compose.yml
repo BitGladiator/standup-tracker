@@ -1,5 +1,4 @@
 version: '3.8'
-
 services:
   postgres:
     image: postgres:16-alpine
@@ -21,6 +20,5 @@ services:
     restart: unless-stopped
     ports:
       - '6379:6379'
-
 volumes:
   postgres_data:
