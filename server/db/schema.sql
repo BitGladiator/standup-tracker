@@ -39,3 +39,14 @@ CREATE TABLE IF NOT EXISTS github_activity (
   prs JSONB,
   reviews JSONB
 );
+
+CREATE TABLE IF NOT EXISTS journals (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  date DATE NOT NULL DEFAULT CURRENT_DATE,
+  problems_solved TEXT,
+  how_it_was_done TEXT,
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(user_id, date)
+);

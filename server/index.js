@@ -11,6 +11,7 @@ const standupRoutes = require('./routes/standup');
 const sessionRoutes = require('./routes/sessions');
 const settingsRoutes = require('./routes/settings');
 const notificationRoutes = require('./routes/notifications');
+const journalRoutes = require('./routes/journals');
 const { runPRReminders } = require('./services/prReminderService');
 
 const app = express();
@@ -42,6 +43,7 @@ app.use('/api/standup', standupRoutes);
 app.use('/api/sessions', sessionRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/journals', journalRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 

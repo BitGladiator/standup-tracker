@@ -42,3 +42,8 @@ export const markAsRead = (id) => apiFetch(`/notifications/${id}/read`, { method
 export const markAllAsRead = () => apiFetch('/notifications/read-all', { method: 'PUT' });
 export const triggerPRCheck = () =>
   apiFetch('/notifications/trigger-check', { method: 'POST' });
+
+export const getTodayJournal = () => apiFetch('/journals/today');
+export const getJournalHistory = () => apiFetch('/journals/history');
+export const saveJournal = (data) =>
+  apiFetch('/journals', { method: 'POST', body: JSON.stringify(data) });

@@ -107,6 +107,10 @@
   background: linear-gradient(135deg, #059669 0%, #10B981 100%);
 }
 
+.journalCard {
+  background: linear-gradient(135deg, #E11D48 0%, #BE123C 100%);
+}
+
 .actionCardTitle {
   font-size: 16px;
   font-weight: 600;

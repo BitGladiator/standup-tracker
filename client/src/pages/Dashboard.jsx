@@ -8,7 +8,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell 
 } from 'recharts';
 import { 
-  Timer, Target, Activity, Flame, LogOut, Settings, BarChart2, BellRing 
+  Timer, Target, Activity, Flame, LogOut, Settings, BarChart2, BellRing, BookOpen 
 } from 'lucide-react';
 import styles from './Dashboard.module.css';
 
@@ -120,7 +120,7 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
-      {/* Quick action cards */}
+
       <motion.div className={styles.quickActionsGrid} variants={itemVariants}>
         <div
           onClick={() => navigate('/standup')}
@@ -153,9 +153,25 @@ const Dashboard = () => {
             <Target size={32} strokeWidth={1.5} />
           </div>
         </div>
+
+        <div
+          onClick={() => navigate('/journal')}
+          className={`${styles.actionCard} ${styles.journalCard}`}
+        >
+          <div>
+            <div className={styles.actionCardTitle}>
+              <BookOpen size={18} />
+              Daily Journal
+            </div>
+            <div className={styles.actionCardDesc}>Document problems solved and daily reflections.</div>
+          </div>
+          <div style={{ alignSelf: 'flex-end', opacity: 0.2 }}>
+            <BookOpen size={32} strokeWidth={1.5} />
+          </div>
+        </div>
       </motion.div>
 
-      {/* Stats */}
+    
       {stats && (
         <motion.div className={styles.statsGrid} variants={itemVariants}>
           <div className={styles.statCard}>
@@ -194,7 +210,7 @@ const Dashboard = () => {
         </motion.div>
       )}
 
-      {/* Interactive Bar Chart */}
+     
       <motion.div className={styles.chartSection} variants={itemVariants}>
         <div className={styles.chartHeader}>
           <h3 className={styles.chartTitle}>
@@ -263,7 +279,7 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
-      {/* Experimental Actions */}
+    
       <motion.div variants={itemVariants} style={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
         <button
           onClick={() => triggerPRCheck().then(() => alert('PR check triggered! Check your notifications.'))}
