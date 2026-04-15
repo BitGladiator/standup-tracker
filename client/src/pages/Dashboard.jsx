@@ -3,11 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
 import { logout, getSessionStats, triggerPRCheck } from '../api/client.js';
 import NotificationBell from '../components/NotificationBell.jsx';
+import { motion } from 'framer-motion';
+import { 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell 
+} from 'recharts';
+import { 
+  Timer, Target, Activity, Flame, LogOut, Settings, BarChart2, BellRing 
+} from 'lucide-react';
+import styles from './Dashboard.module.css';
 
 const Dashboard = () => {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
+  const [hoveredBar, setHoveredBar] = useState(null);
 
   useEffect(() => {
     getSessionStats().then(setStats).catch(console.error);
@@ -28,121 +37,245 @@ const Dashboard = () => {
       const found = stats?.daily?.find((r) => r.date?.startsWith(dateStr));
       days.push({
         label: d.toLocaleDateString('en-US', { weekday: 'short' }),
+        fullDate: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         minutes: found ? parseInt(found.total_minutes) : 0,
       });
     }
     return days;
   };
 
-  const days = getLast7Days();
-  const maxMinutes = Math.max(...days.map((d) => d.minutes), 1);
+  const chartData = getLast7Days();
+
+  // Animation variants tweaked slightly for classic look
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { staggerChildren: 0.05 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { type: "tween", duration: 0.3 }
+    }
+  };
+
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className={styles.customTooltip}>
+          <div className={styles.tooltipLabel}>{payload[0].payload.fullDate}</div>
+          <div className={styles.tooltipValue}>
+            <Timer size={14} color="#a78bfa" />
+            <span>{payload[0].value} <span style={{ fontSize: '12px', fontWeight: '500', opacity: 0.8 }}>min</span></span>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
-    <div style={{ maxWidth: '720px', margin: '0 auto', padding: '40px 24px' }}>
-
+    <motion.div 
+      className={styles.dashboardContainer}
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
-        <h1 style={{ fontSize: '22px', fontWeight: '600', color: '#1a202c', margin: 0 }}>
-          Standup Tracker
+      <motion.div className={styles.header} variants={itemVariants}>
+        <h1 className={styles.headerTitle}>
+          Dashboard
         </h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <NotificationBell userId={user?.id} />
+        <div className={styles.headerActions}>
+          <div style={{ position: 'relative' }}>
+            <NotificationBell userId={user?.id} />
+          </div>
+          
           <button
             onClick={() => navigate('/settings')}
-            style={{ fontSize: '13px', color: '#718096', background: 'none', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }}
+            className={styles.iconButton}
+            title="Settings"
           >
-            Settings
+            <Settings size={16} />
           </button>
-          <img src={user?.avatar_url} alt={user?.username}
-            style={{ width: '32px', height: '32px', borderRadius: '50%' }} />
-          <span style={{ fontSize: '13px', color: '#4a5568' }}>{user?.username}</span>
+          
+          <div className={styles.userInfo}>
+            <img src={user?.avatar_url || 'https://github.com/github.png'} alt={user?.username} className={styles.avatar} />
+            <span className={styles.username}>{user?.username || 'Guest'}</span>
+          </div>
+          
           <button
             onClick={handleLogout}
-            style={{ fontSize: '13px', color: '#718096', background: 'none', border: 'none', cursor: 'pointer' }}
+            className={styles.iconButton}
+            title="Logout"
+            style={{ color: '#ef4444' }}
           >
-            Logout
+            <LogOut size={16} />
           </button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Quick action cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '32px' }}>
+      <motion.div className={styles.quickActionsGrid} variants={itemVariants}>
         <div
           onClick={() => navigate('/standup')}
-          style={{ background: '#3182CE', borderRadius: '12px', padding: '24px', cursor: 'pointer', color: '#fff' }}
+          className={`${styles.actionCard} ${styles.standupCard}`}
         >
-          <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '4px' }}>Today's standup</div>
-          <div style={{ fontSize: '13px', opacity: 0.85 }}>Generate from GitHub activity</div>
+          <div>
+            <div className={styles.actionCardTitle}>
+              <Activity size={18} />
+              Today's standup
+            </div>
+            <div className={styles.actionCardDesc}>Review Github activity and generate your daily standup summary.</div>
+          </div>
+          <div style={{ alignSelf: 'flex-end', opacity: 0.2 }}>
+            <Activity size={32} strokeWidth={1.5} />
+          </div>
         </div>
 
         <div
           onClick={() => navigate('/focus')}
-          style={{ background: '#276749', borderRadius: '12px', padding: '24px', cursor: 'pointer', color: '#fff' }}
+          className={`${styles.actionCard} ${styles.focusCard}`}
         >
-          <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '4px' }}>Focus timer</div>
-          <div style={{ fontSize: '13px', opacity: 0.85 }}>Pomodoro — 25 min sessions</div>
+          <div>
+            <div className={styles.actionCardTitle}>
+              <Target size={18} />
+              Focus timer
+            </div>
+            <div className={styles.actionCardDesc}>Start a 25-minute pomodoro session for deep work blocks.</div>
+          </div>
+          <div style={{ alignSelf: 'flex-end', opacity: 0.2 }}>
+            <Target size={32} strokeWidth={1.5} />
+          </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Stats */}
       {stats && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '32px' }}>
-          <StatCard
-            label="Total focus time"
-            value={`${Math.round((stats.totals?.total_minutes || 0) / 60 * 10) / 10}h`}
-          />
-          <StatCard label="Sessions completed" value={stats.totals?.total_sessions || 0} />
-          <StatCard
-            label="Day streak"
-            value={`${stats.streak} ${stats.streak === 1 ? 'day' : 'days'}`}
-          />
-        </div>
+        <motion.div className={styles.statsGrid} variants={itemVariants}>
+          <div className={styles.statCard}>
+            <div className={`${styles.statIconWrapper} ${styles.blue}`}>
+              <Timer size={20} />
+            </div>
+            <div>
+              <div className={styles.statValue}>
+                {`${Math.round((stats.totals?.total_minutes || 0) / 60 * 10) / 10}`} <span style={{ fontSize: '14px', fontWeight: '500', opacity: 0.7 }}>hrs</span>
+              </div>
+              <div className={styles.statLabel}>Total Focus</div>
+            </div>
+          </div>
+          
+          <div className={styles.statCard}>
+            <div className={`${styles.statIconWrapper} ${styles.green}`}>
+              <Target size={20} />
+            </div>
+            <div>
+              <div className={styles.statValue}>{stats.totals?.total_sessions || 0}</div>
+              <div className={styles.statLabel}>Sessions</div>
+            </div>
+          </div>
+          
+          <div className={styles.statCard}>
+            <div className={`${styles.statIconWrapper} ${styles.orange}`}>
+              <Flame size={20} />
+            </div>
+            <div>
+              <div className={styles.statValue}>
+                {stats.streak} <span style={{ fontSize: '14px', fontWeight: '500', opacity: 0.7 }}>{stats.streak === 1 ? 'day' : 'days'}</span>
+              </div>
+              <div className={styles.statLabel}>Current Streak</div>
+            </div>
+          </div>
+        </motion.div>
       )}
 
-      {/* Weekly bar chart */}
-      <div style={{ background: '#F7FAFC', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px', marginBottom: '24px' }}>
-        <h3 style={{ fontSize: '13px', fontWeight: '600', color: '#4a5568', margin: '0 0 16px' }}>
-          Focus time this week
-        </h3>
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '80px' }}>
-          {days.map((day, i) => (
-            <div
-              key={i}
-              style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', height: '100%', justifyContent: 'flex-end' }}
-            >
-              <div
-                title={`${day.minutes} min`}
-                style={{
-                  width: '100%',
-                  height: `${Math.max((day.minutes / maxMinutes) * 60, day.minutes > 0 ? 4 : 0)}px`,
-                  background: day.minutes > 0 ? '#3182CE' : '#e2e8f0',
-                  borderRadius: '4px 4px 0 0',
-                  transition: 'height 0.3s ease',
-                }}
-              />
-              <span style={{ fontSize: '11px', color: '#a0aec0' }}>{day.label}</span>
-            </div>
-          ))}
+      {/* Interactive Bar Chart */}
+      <motion.div className={styles.chartSection} variants={itemVariants}>
+        <div className={styles.chartHeader}>
+          <h3 className={styles.chartTitle}>
+            <BarChart2 size={16} color="#a78bfa" />
+            Focus Time This Week
+          </h3>
         </div>
-      </div>
+        <div style={{ height: '220px', width: '100%' }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={chartData}
+              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+              onMouseMove={(state) => {
+                if (state.isTooltipActive) {
+                  setHoveredBar(state.activeTooltipIndex);
+                } else {
+                  setHoveredBar(null);
+                }
+              }}
+              onMouseLeave={() => setHoveredBar(null)}
+            >
+              <defs>
+                <linearGradient id="colorMinutes" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#8b5cf6" stopOpacity={1}/>
+                  <stop offset="95%" stopColor="#6d28d9" stopOpacity={0.8}/>
+                </linearGradient>
+                <linearGradient id="colorMinutesHover" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#a78bfa" stopOpacity={1}/>
+                  <stop offset="95%" stopColor="#7c3aed" stopOpacity={0.9}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(156, 163, 175, 0.2)" />
+              <XAxis 
+                dataKey="label" 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{ fill: '#9ca3af', fontSize: 12 }}
+                dy={10}
+              />
+              <YAxis 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{ fill: '#9ca3af', fontSize: 12 }}
+              />
+              <Tooltip 
+                content={<CustomTooltip />} 
+                cursor={{ fill: 'rgba(156, 163, 175, 0.05)' }} 
+              />
+              <Bar 
+                dataKey="minutes" 
+                radius={[4, 4, 0, 0]}
+                animationDuration={800}
+                animationEasing="ease-out"
+                barSize={32}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={hoveredBar === index ? "url(#colorMinutesHover)" : "url(#colorMinutes)"} 
+                    style={{ transition: 'all 0.2s ease' }}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </motion.div>
 
-      {/* Testing trigger */}
-      <button
-        onClick={() => triggerPRCheck().then(() => alert('PR check triggered! Check your notifications.'))}
-        style={{ fontSize: '12px', color: '#a0aec0', background: 'none', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }}
-      >
-        Trigger PR check (testing)
-      </button>
+      {/* Experimental Actions */}
+      <motion.div variants={itemVariants} style={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
+        <button
+          onClick={() => triggerPRCheck().then(() => alert('PR check triggered! Check your notifications.'))}
+          className={styles.testButton}
+        >
+          <BellRing size={14} />
+          Trigger PR check (test)
+        </button>
+      </motion.div>
 
-    </div>
+    </motion.div>
   );
 };
-
-const StatCard = ({ label, value }) => (
-  <div style={{ background: '#F7FAFC', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '16px' }}>
-    <div style={{ fontSize: '20px', fontWeight: '600', color: '#1a202c', marginBottom: '4px' }}>{value}</div>
-    <div style={{ fontSize: '12px', color: '#718096' }}>{label}</div>
-  </div>
-);
 
 export default Dashboard;
