@@ -1,5 +1,67 @@
 version: '3.8'
+
 services:
+  nginx: 
+    image: nginx:alpine
+    container_name: standup_nginx
+    ports:
+      - '80:80'
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - server1
+      - server2
+      - server3
+    restart: unless-stopped
+
+  server1:
+    build: ./server
+    container_name: standup_server1
+    environment:
+      - PORT=5500
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/standup_tracker
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
+      - CLIENT_URL=${CLIENT_URL}
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+  server2:
+    build: ./server
+    container_name: standup_server2
+    environment:
+      - PORT=5501
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/standup_tracker
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
+      - CLIENT_URL=${CLIENT_URL}
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+  server3:
+    build: ./server
+    container_name: standup_server3
+    environment:
+      - PORT=5502
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/standup_tracker
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
+      - CLIENT_URL=${CLIENT_URL}
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
   postgres:
     image: postgres:16-alpine
     container_name: standup_db
@@ -13,6 +75,16 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./server/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    command: >
+      postgres
+        -c max_connections=200
+        -c shared_buffers=256MB
+        -c effective_cache_size=1GB
+        -c work_mem=4MB
+        -c maintenance_work_mem=64MB
+        -c checkpoint_completion_target=0.9
+        -c wal_buffers=16MB
+        -c default_statistics_target=100
 
   redis:
     image: redis:7-alpine
@@ -20,5 +92,15 @@ services:
     restart: unless-stopped
     ports:
       - '6379:6379'
+    command: >
+      redis-server
+        --maxmemory 256mb
+        --maxmemory-policy allkeys-lru
+        --save 900 1
+        --save 300 10
+    volumes:
+      - redis_data:/data
+
 volumes:
   postgres_data:
+  redis_data:
