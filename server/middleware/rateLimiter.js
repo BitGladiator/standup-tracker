@@ -1,5 +1,5 @@
 const rateLimit = require('express-rate-limit');
-const RedisStore = require('rate-limit-redis');
+const RedisStore = require('rate-limit-redis').default || require('rate-limit-redis');
 const slowDown = require('express-slow-down');
 const redis = require('../db/redis');
 
@@ -25,7 +25,7 @@ const globalLimiter = rateLimit({
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: 100,
   standardHeaders: true,
   legacyHeaders: false,
   store: makeStore('rl:auth:'),
@@ -35,10 +35,11 @@ const authLimiter = rateLimit({
 
 const githubLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  max: 10,
+  max: 100,
   standardHeaders: true,
   legacyHeaders: false,
   store: makeStore('rl:github:'),
+  validate: { ip: false },
   keyGenerator: (req) => `user:${req.userId || req.ip}`,
   message: { error: 'GitHub generate limit reached. Try again in an hour.' },
 });

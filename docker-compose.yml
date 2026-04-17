@@ -1,65 +1,31 @@
 version: '3.8'
 
 services:
-  nginx: 
-    image: nginx:alpine
-    container_name: standup_nginx
+  server:
+    build: ./server
+    container_name: standup_server
     ports:
-      - '80:80'
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
-    depends_on:
-      - server1
-      - server2
-      - server3
-    restart: unless-stopped
-
-  server1:
-    build: ./server
-    container_name: standup_server1
+      - '5500:5500'
+    env_file:
+      - ./server/.env
     environment:
-      - PORT=5500
+      # Overriding the local URLs from .env to use Docker internal network hostnames
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/standup_tracker
       - REDIS_URL=redis://redis:6379
-      - JWT_SECRET=${JWT_SECRET}
-      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
-      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
-      - CLIENT_URL=${CLIENT_URL}
     depends_on:
       - postgres
       - redis
     restart: unless-stopped
 
-  server2:
-    build: ./server
-    container_name: standup_server2
-    environment:
-      - PORT=5501
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/standup_tracker
-      - REDIS_URL=redis://redis:6379
-      - JWT_SECRET=${JWT_SECRET}
-      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
-      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
-      - CLIENT_URL=${CLIENT_URL}
+  client:
+    build: ./client
+    container_name: standup_client
+    ports:
+      - '5173:5173'
+    env_file:
+      - ./client/.env
     depends_on:
-      - postgres
-      - redis
-    restart: unless-stopped
-
-  server3:
-    build: ./server
-    container_name: standup_server3
-    environment:
-      - PORT=5502
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/standup_tracker
-      - REDIS_URL=redis://redis:6379
-      - JWT_SECRET=${JWT_SECRET}
-      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
-      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
-      - CLIENT_URL=${CLIENT_URL}
-    depends_on:
-      - postgres
-      - redis
+      - server
     restart: unless-stopped
 
   postgres:
