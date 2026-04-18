@@ -34,9 +34,10 @@ app.use(compress);
 
 app.use(requestLogger);
 
-app.use(globalLimiter);
-
-app.use(speedLimiter);
+if (process.env.NODE_ENV === 'production') {
+  app.use(globalLimiter);
+  app.use(speedLimiter);
+}
 
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(express.json({ limit: '10kb' })); 
