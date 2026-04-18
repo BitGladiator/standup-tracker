@@ -1,6 +1,9 @@
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
 import useStandup from '../hooks/useStandup.js';
+import { io } from 'socket.io-client';
+import StandupScore from '../components/StandupScore.jsx';
 
 const fieldStyle = {
   width: '100%',
@@ -29,6 +32,10 @@ const labelStyle = {
 const Standup = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [score, setScore] = useState(null);
+  const [scoreLoading, setScoreLoading] = useState(false);
+  const socketRef = useRef(null);
+
   const {
     form,
     status,
@@ -42,24 +49,57 @@ const Standup = () => {
     handleGenerate,
     handleChange,
     handleSave,
-  } = useStandup();
+  } = useStandup({ onSaveSuccess: () => {
+    setScore(null);
+    setScoreLoading(true);
+  }});
 
   const isLoading = status === 'loading';
   const isGenerating = status === 'generating';
   const isSaving = status === 'saving';
   const isSaved = status === 'saved';
 
+  useEffect(() => {
+    if (!user?.id) return;
+
+    socketRef.current = io(import.meta.env.VITE_API_URL, {
+      withCredentials: true,
+      transports: ['websocket'],
+    });
+
+    socketRef.current.on('connect', () => {
+      socketRef.current.emit('join', user.id);
+    });
+
+    socketRef.current.on('standup_score', (data) => {
+      setScore(data);
+      setScoreLoading(false);
+    });
+
+    return () => socketRef.current?.disconnect();
+  }, [user?.id]);
+
   const formatTime = (isoString) => {
     if (!isoString) return '';
-    return new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return new Date(isoString).toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
   const today = new Date().toLocaleDateString('en-US', {
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
   });
 
   if (isLoading) {
-    return <div style={{ padding: '40px', textAlign: 'center', color: '#718096' }}>Loading...</div>;
+    return (
+      <div style={{ padding: '40px', textAlign: 'center', color: '#718096' }}>
+        Loading...
+      </div>
+    );
   }
 
   return (
@@ -79,6 +119,12 @@ const Standup = () => {
           <p style={{ fontSize: '13px', color: '#718096', margin: '4px 0 0' }}>{today}</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button
+            onClick={() => navigate('/score-trend')}
+            style={{ fontSize: '13px', color: '#718096', background: 'none', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }}
+          >
+            Score trend
+          </button>
           <button
             onClick={() => navigate('/history')}
             style={{ fontSize: '13px', color: '#718096', background: 'none', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }}
@@ -111,25 +157,33 @@ const Standup = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         <div>
           <label style={labelStyle}>What did you do yesterday?</label>
-          <textarea style={fieldStyle} value={form.yesterday}
+          <textarea
+            style={fieldStyle}
+            value={form.yesterday}
             onChange={(e) => handleChange('yesterday', e.target.value)}
-            placeholder="• Worked on auth flow&#10;• Reviewed 2 PRs" />
+            placeholder="• Worked on auth flow&#10;• Reviewed 2 PRs"
+          />
         </div>
         <div>
           <label style={labelStyle}>What will you do today?</label>
-          <textarea style={fieldStyle} value={form.today}
+          <textarea
+            style={fieldStyle}
+            value={form.today}
             onChange={(e) => handleChange('today', e.target.value)}
-            placeholder="• Finish the standup generator&#10;• Deploy to staging" />
+            placeholder="• Finish the standup generator&#10;• Deploy to staging"
+          />
         </div>
         <div>
           <label style={labelStyle}>Any blockers?</label>
-          <textarea style={{ ...fieldStyle, minHeight: '80px' }} value={form.blockers}
+          <textarea
+            style={{ ...fieldStyle, minHeight: '80px' }}
+            value={form.blockers}
             onChange={(e) => handleChange('blockers', e.target.value)}
-            placeholder="None" />
+            placeholder="None"
+          />
         </div>
       </div>
 
-      {/* Slack toggle */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '20px' }}>
         <input
           type="checkbox"
@@ -154,7 +208,9 @@ const Standup = () => {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {isSaved && savedAt && (
-            <span style={{ fontSize: '12px', color: '#48BB78' }}>Saved at {formatTime(savedAt)}</span>
+            <span style={{ fontSize: '12px', color: '#48BB78' }}>
+              Saved at {formatTime(savedAt)}
+            </span>
           )}
           <button
             onClick={handleSave}
@@ -165,6 +221,7 @@ const Standup = () => {
           </button>
         </div>
       </div>
+      <StandupScore score={score} loading={scoreLoading} />
 
       {activity && (
         <div style={{ marginTop: '40px', borderTop: '1px solid #e2e8f0', paddingTop: '28px' }}>
