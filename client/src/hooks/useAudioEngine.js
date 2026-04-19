@@ -40,7 +40,7 @@ const useAudioEngine = (phase) => {
   const prevPhaseRef = useRef(phase);
   const vibeRef = useRef(vibe);
 
-  // Keep vibe ref in sync
+
   useEffect(() => { vibeRef.current = vibe; }, [vibe]);
 
   const getTrackUrl = useCallback((phaseType, vibeKey) => {

@@ -48,3 +48,4 @@ export const getJournalHistory = () => apiFetch('/journals/history');
 export const saveJournal = (data) =>
   apiFetch('/journals', { method: 'POST', body: JSON.stringify(data) });
 export const getScoreTrend = () => apiFetch('/standup/score-trend');
+export const getHeatmap = () => apiFetch('/heatmap');

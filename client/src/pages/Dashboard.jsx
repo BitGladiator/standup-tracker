@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
-import { logout, getSessionStats, triggerPRCheck } from '../api/client.js';
+import { logout, getSessionStats, triggerPRCheck, getHeatmap } from '../api/client.js';
 import NotificationBell from '../components/NotificationBell.jsx';
+import ContributionHeatmap from '../components/ContributionHeatmap.jsx';
 import { motion } from 'framer-motion';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell 
 } from 'recharts';
 import { 
-  Timer, Target, Activity, Flame, LogOut, Settings, BarChart2, BellRing, BookOpen 
+  Timer, Target, Activity, Flame, LogOut, Settings, BarChart2, BellRing, BookOpen, GitGraph 
 } from 'lucide-react';
 import styles from './Dashboard.module.css';
 
@@ -17,9 +18,11 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [hoveredBar, setHoveredBar] = useState(null);
+  const [heatmapData, setHeatmapData] = useState(null);
 
   useEffect(() => {
     getSessionStats().then(setStats).catch(console.error);
+    getHeatmap().then(setHeatmapData).catch(() => {});
   }, []);
 
   const handleLogout = async () => {
@@ -46,7 +49,7 @@ const Dashboard = () => {
 
   const chartData = getLast7Days();
 
-  // Animation variants tweaked slightly for classic look
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { 
@@ -86,7 +89,7 @@ const Dashboard = () => {
       initial="hidden"
       animate="visible"
     >
-      {/* Header */}
+
       <motion.div className={styles.header} variants={itemVariants}>
         <h1 className={styles.headerTitle}>
           Dashboard
@@ -169,6 +172,7 @@ const Dashboard = () => {
             <BookOpen size={32} strokeWidth={1.5} />
           </div>
         </div>
+
       </motion.div>
 
     
@@ -280,6 +284,22 @@ const Dashboard = () => {
       </motion.div>
 
     
+      {/* Full Contribution Heatmap */}
+      {heatmapData && (
+        <motion.div className={styles.heatmapSection} variants={itemVariants}>
+          <div className={styles.chartHeader}>
+            <h3 className={styles.chartTitle}>
+              <GitGraph size={16} color="#10b981" />
+              Contribution Activity
+            </h3>
+            <span style={{ fontSize: '12px', color: 'var(--text)', opacity: 0.5 }}>
+              {user?.username}'s last 365 days
+            </span>
+          </div>
+          <ContributionHeatmap data={heatmapData} />
+        </motion.div>
+      )}
+
       <motion.div variants={itemVariants} style={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
         <button
           onClick={() => triggerPRCheck().then(() => alert('PR check triggered! Check your notifications.'))}

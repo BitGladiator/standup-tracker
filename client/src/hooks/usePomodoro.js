@@ -90,14 +90,25 @@ const usePomodoro = () => {
     setPhase('paused'); // separate state — does NOT reset seconds
   };
 
-  const reset = () => {
+  const reset = useCallback(() => {
     clearTimer();
+
+    // Save partial work session if the user was mid-work (running or paused)
+    if (startedAtRef.current && (phase === 'work' || (phase === 'paused' && activePhase === 'work'))) {
+      const endedAt = new Date();
+      const elapsedSeconds = WORK_DURATION - secondsLeft;
+      const elapsedMinutes = Math.floor(elapsedSeconds / 60);
+      if (elapsedMinutes >= 1) {
+        persistSession(startedAtRef.current, endedAt, elapsedMinutes);
+      }
+    }
+
     setPhase('idle');
     setActivePhase('work');
     setSecondsLeft(WORK_DURATION);
     setPomodoroCount(0);
     startedAtRef.current = null;
-  };
+  }, [phase, activePhase, secondsLeft, persistSession]);
 
   const skipBreak = () => {
     startedAtRef.current = new Date();
