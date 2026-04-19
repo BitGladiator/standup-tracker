@@ -1,164 +1,60 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 
-const VIBES = {
+const TRACKS = {
   lofi: {
-    workFreq: 40,       
-    workNoiseColor: 0.8, 
-    breakFreq: 8,       
-    breakNoiseColor: 0.6,
-    label: 'Lo-fi focus',
+    label: 'Lo-fi',
+    work: '/audio/lofi-work.mp3',
+    break: '/audio/lofi-break.mp3',
   },
   rain: {
-    workFreq: 14,
-    workNoiseColor: 0.5,
-    breakFreq: 6,
-    breakNoiseColor: 0.4,
     label: 'Rain',
+    work: '/audio/rain-work.mp3',
+    break: '/audio/rain-break.mp3',
   },
-  deep: {
-    workFreq: 40,
-    workNoiseColor: 1.0, 
-    breakFreq: 4,
-    breakNoiseColor: 0.9,
+  deepfocus: {
     label: 'Deep focus',
+    work: '/audio/deep-focus-work.mp3',
+    break: '/audio/deep-focus-break.mp3',
   },
   nature: {
-    workFreq: 10,
-    workNoiseColor: 0.3, 
-    breakFreq: 5,
-    breakNoiseColor: 0.2,
     label: 'Nature',
+    work: '/audio/nature-work.mp3',
+    break: '/audio/nature-break.mp3',
   },
-};
-
-const createNoiseNode = (ctx, colorFactor) => {
-
-  const bufferSize = ctx.sampleRate * 2;
-  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-  const data = buffer.getChannelData(0);
-
-  let lastOut = 0;
-  for (let i = 0; i < bufferSize; i++) {
-    const white = Math.random() * 2 - 1;
-    
-    lastOut = (lastOut + 0.02 * white) / 1.02;
-    data[i] = white * (1 - colorFactor) + lastOut * colorFactor * 3.5;
-  }
-
-  const source = ctx.createBufferSource();
-  source.buffer = buffer;
-  source.loop = true;
-  return source;
-};
-
-const createBinauralBeat = (ctx, baseFreq, beatFreq) => {
-  
-  const left = ctx.createOscillator();
-  const right = ctx.createOscillator();
-  const merger = ctx.createChannelMerger(2);
-
-  left.frequency.value = baseFreq;
-  right.frequency.value = baseFreq + beatFreq;
-  left.type = 'sine';
-  right.type = 'sine';
-
-  left.connect(merger, 0, 0);
-  right.connect(merger, 0, 1);
-
-  return { left, right, merger };
 };
 
 const useAudioEngine = (phase) => {
   const [playing, setPlaying] = useState(false);
-  const [volume, setVolume] = useState(0.4);
+  const [volume, setVolume] = useState(0.5);
   const [muted, setMuted] = useState(false);
   const [vibe, setVibe] = useState('lofi');
+  const [loading, setLoading] = useState(false);
   const [analyserData, setAnalyserData] = useState(new Uint8Array(64));
 
+  const audioRef = useRef(null);
   const ctxRef = useRef(null);
-  const nodesRef = useRef({});
-  const masterGainRef = useRef(null);
+  const sourceRef = useRef(null);
   const analyserRef = useRef(null);
+  const gainRef = useRef(null);
   const animFrameRef = useRef(null);
   const prevPhaseRef = useRef(phase);
+  const vibeRef = useRef(vibe);
 
-  const stopAll = useCallback(() => {
-    const nodes = nodesRef.current;
-    try {
-      nodes.noise?.stop();
-      nodes.binauralLeft?.stop();
-      nodes.binauralRight?.stop();
-    } catch {}
-    nodesRef.current = {};
+  // Keep vibe ref in sync
+  useEffect(() => { vibeRef.current = vibe; }, [vibe]);
+
+  const getTrackUrl = useCallback((phaseType, vibeKey) => {
+    const track = TRACKS[vibeKey];
+    if (!track) return null;
+    return phaseType === 'work' ? track.work : track.break;
   }, []);
 
-  const buildGraph = useCallback((ctx, phaseType, vibeKey) => {
-    const config = VIBES[vibeKey];
-    const isWork = phaseType === 'work';
-
-    const master = ctx.createGain();
-    master.gain.value = muted ? 0 : volume;
-    masterGainRef.current = master;
-
-    const analyser = ctx.createAnalyser();
-    analyser.fftSize = 128;
-    analyserRef.current = analyser;
-
-    const noise = createNoiseNode(
-      ctx,
-      isWork ? config.workNoiseColor : config.breakNoiseColor
-    );
-    const noiseGain = ctx.createGain();
-    noiseGain.gain.value = 0.6;
-
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.value = isWork ? 1200 : 800;
-    filter.Q.value = 0.5;
-
-    noise.connect(filter);
-    filter.connect(noiseGain);
-    noiseGain.connect(analyser);
-
-    const baseFreq = isWork ? 200 : 150;
-    const beatFreq = isWork ? config.workFreq : config.breakFreq;
-    const { left, right, merger } = createBinauralBeat(ctx, baseFreq, beatFreq);
-    const binauralGain = ctx.createGain();
-    binauralGain.gain.value = 0.08; 
-
-    merger.connect(binauralGain);
-    binauralGain.connect(analyser);
-
-    const lfo = ctx.createOscillator();
-    const lfoGain = ctx.createGain();
-    lfo.frequency.value = 0.1; 
-    lfoGain.gain.value = 0.05;
-    lfo.connect(lfoGain);
-    lfoGain.connect(noiseGain.gain);
-    lfo.start();
-
-    analyser.connect(master);
-    master.connect(ctx.destination);
-
-    noise.start();
-    left.start();
-    right.start();
-
-    nodesRef.current = {
-      noise,
-      binauralLeft: left,
-      binauralRight: right,
-      lfo,
-    };
-
- 
-    master.gain.setValueAtTime(0, ctx.currentTime);
-    master.gain.linearRampToValueAtTime(
-      muted ? 0 : volume,
-      ctx.currentTime + 1.5
-    );
-  }, [volume, muted]);
-
+  const stopVisualizer = useCallback(() => {
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
+    }
+  }, []);
 
   const startVisualizer = useCallback(() => {
     const tick = () => {
@@ -171,87 +67,163 @@ const useAudioEngine = (phase) => {
     animFrameRef.current = requestAnimationFrame(tick);
   }, []);
 
-  const stopVisualizer = useCallback(() => {
-    if (animFrameRef.current) {
-      cancelAnimationFrame(animFrameRef.current);
-      animFrameRef.current = null;
-    }
-  }, []);
-
-  const start = useCallback(async () => {
+  const setupAudioGraph = useCallback((audioEl) => {
+   
     if (!ctxRef.current) {
       ctxRef.current = new (window.AudioContext || window.webkitAudioContext)();
     }
-    if (ctxRef.current.state === 'suspended') {
+
+    const ctx = ctxRef.current;
+
+
+    try { sourceRef.current?.disconnect(); } catch {}
+
+    
+    const source = ctx.createMediaElementSource(audioEl);
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 128;
+    analyser.smoothingTimeConstant = 0.8;
+
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = muted ? 0 : volume;
+
+    source.connect(analyser);
+    analyser.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    sourceRef.current = source;
+    analyserRef.current = analyser;
+    gainRef.current = gainNode;
+  }, [volume, muted]);
+
+  const loadAndPlay = useCallback(async (phaseType, vibeKey) => {
+    const url = getTrackUrl(phaseType, vibeKey);
+    if (!url) return;
+
+    setLoading(true);
+
+  
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = '';
+    }
+
+    const audio = new Audio();
+    audio.loop = true;
+    audio.volume = 1; 
+    audio.src = url;
+    audioRef.current = audio;
+
+ 
+    setupAudioGraph(audio);
+
+    if (ctxRef.current?.state === 'suspended') {
       await ctxRef.current.resume();
     }
-    stopAll();
-    buildGraph(ctxRef.current, phase, vibe);
-    startVisualizer();
-    setPlaying(true);
-  }, [phase, vibe, stopAll, buildGraph, startVisualizer]);
+
+    try {
+      await audio.play();
+      setPlaying(true);
+      setLoading(false);
+      startVisualizer();
+    } catch (err) {
+      console.error('Playback failed:', err);
+      setLoading(false);
+    }
+  }, [getTrackUrl, setupAudioGraph, startVisualizer]);
+
+  const start = useCallback(async () => {
+    const currentPhase = phase === 'work' || phase === 'break' ? phase : 'work';
+    await loadAndPlay(currentPhase, vibeRef.current);
+  }, [phase, loadAndPlay]);
 
   const stop = useCallback(() => {
-    stopAll();
-    stopVisualizer();
-    setPlaying(false);
-    setAnalyserData(new Uint8Array(64));
-  }, [stopAll, stopVisualizer]);
+    if (audioRef.current) {
+      if (gainRef.current && ctxRef.current) {
+        gainRef.current.gain.linearRampToValueAtTime(
+          0, ctxRef.current.currentTime + 0.5
+        );
+        setTimeout(() => {
+          audioRef.current?.pause();
+          setPlaying(false);
+          setAnalyserData(new Uint8Array(64));
+          stopVisualizer();
+        }, 600);
+      } else {
+        audioRef.current.pause();
+        setPlaying(false);
+        stopVisualizer();
+      }
+    }
+  }, [stopVisualizer]);
 
 
   useEffect(() => {
     if (prevPhaseRef.current === phase) return;
     prevPhaseRef.current = phase;
 
-    if (playing && (phase === 'work' || phase === 'break')) {
-      if (masterGainRef.current && ctxRef.current) {
-        masterGainRef.current.gain.linearRampToValueAtTime(
-          0,
-          ctxRef.current.currentTime + 0.8
-        );
-        setTimeout(() => {
-          stopAll();
-          buildGraph(ctxRef.current, phase, vibe);
-        }, 900);
+    if (playing) {
+      if (phase === 'work' || phase === 'break') {
+
+        if (gainRef.current && ctxRef.current) {
+          gainRef.current.gain.linearRampToValueAtTime(
+            0, ctxRef.current.currentTime + 0.8
+          );
+          setTimeout(() => {
+            loadAndPlay(phase, vibeRef.current);
+          }, 900);
+        } else {
+          loadAndPlay(phase, vibeRef.current);
+        }
+      } else if (phase === 'idle' || phase === 'paused') {
+        stop();
       }
     }
-
-    if (phase === 'idle' || phase === 'paused') {
-      if (playing) stop();
-    }
-  }, [phase, playing, vibe, stopAll, buildGraph, stop]);
+  }, [phase, playing, loadAndPlay, stop]);
 
 
   useEffect(() => {
-    if (masterGainRef.current && ctxRef.current) {
-      masterGainRef.current.gain.linearRampToValueAtTime(
+    if (gainRef.current && ctxRef.current) {
+      gainRef.current.gain.linearRampToValueAtTime(
         muted ? 0 : volume,
         ctxRef.current.currentTime + 0.1
       );
+    }
+    if (audioRef.current && !gainRef.current) {
+      audioRef.current.volume = muted ? 0 : volume;
     }
   }, [volume, muted]);
 
 
   useEffect(() => {
     return () => {
-      stopAll();
+      audioRef.current?.pause();
       stopVisualizer();
       ctxRef.current?.close();
     };
-  }, []);
+  }, [stopVisualizer]);
 
-  const toggleMute = () => setMuted((m) => !m);
+  const toggleMute = useCallback(() => setMuted((m) => !m), []);
 
-  const changeVibe = (newVibe) => {
+  const changeVibe = useCallback(async (newVibe) => {
     setVibe(newVibe);
-    if (playing && ctxRef.current) {
-      stopAll();
-      buildGraph(ctxRef.current, phase, newVibe);
+    vibeRef.current = newVibe;
+    if (playing) {
+      const currentPhase = phase === 'work' || phase === 'break' ? phase : 'work';
+      if (gainRef.current && ctxRef.current) {
+        gainRef.current.gain.linearRampToValueAtTime(
+          0, ctxRef.current.currentTime + 0.4
+        );
+        setTimeout(() => loadAndPlay(currentPhase, newVibe), 500);
+      } else {
+        loadAndPlay(currentPhase, newVibe);
+      }
     }
-  };
+  }, [playing, phase, loadAndPlay]);
 
   return {
     playing,
+    loading,
     volume,
     setVolume,
     muted,
@@ -259,7 +231,7 @@ const useAudioEngine = (phase) => {
     vibe,
     changeVibe,
     analyserData,
-    vibes: VIBES,
+    vibes: TRACKS,
     start,
     stop,
   };
