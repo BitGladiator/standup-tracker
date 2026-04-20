@@ -81,12 +81,23 @@ services:
       - "--storage.tsdb.retention.time=7d"
       - "--storage.tsdb.retention.size=512MB"
       - "--web.enable-lifecycle"
+      - "--web.enable-remote-write-receiver"
     deploy:
       resources:
         limits:
           memory: 256M
           cpus: "0.5"
-
+  pushgateway:
+    image: prom/pushgateway:latest
+    container_name: standup_pushgateway
+    restart: unless-stopped
+    ports:
+      - '9091:9091'
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+          cpus: '0.1'
   grafana:
     image: grafana/grafana:latest
     container_name: standup_grafana

@@ -50,6 +50,7 @@ const speedLimiter = slowDown({
   delayAfter: 50,
   delayMs: (used) => (used - 50) * 500,
   store: makeStore('rl:slow:'),
+  skip: (req) => req.path === '/api/health',
 });
 
 module.exports = { globalLimiter, authLimiter, githubLimiter, speedLimiter };
