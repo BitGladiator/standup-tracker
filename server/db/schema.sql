@@ -50,3 +50,34 @@ CREATE TABLE IF NOT EXISTS journals (
   created_at TIMESTAMP DEFAULT NOW(),
   UNIQUE(user_id, date)
 );
+
+CREATE TABLE IF NOT EXISTS standup_scores (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  standup_id INTEGER REFERENCES standups(id) ON DELETE CASCADE UNIQUE,
+  overall_score INTEGER,
+  grade VARCHAR(10),
+  clarity_score INTEGER,
+  specificity_score INTEGER,
+  blocker_quality_score INTEGER,
+  completeness_score INTEGER,
+  clarity_feedback TEXT,
+  specificity_feedback TEXT,
+  blocker_feedback TEXT,
+  completeness_feedback TEXT,
+  overall_feedback TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS notifications (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  type VARCHAR(50),
+  title VARCHAR(255),
+  body TEXT,
+  pr_url TEXT,
+  pr_title TEXT,
+  repo TEXT,
+  read BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT NOW()
+);

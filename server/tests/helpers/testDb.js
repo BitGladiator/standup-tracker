@@ -8,6 +8,7 @@ const setupTestDb = async () => {
       github_activity,
       focus_sessions,
       standups,
+      journals,
       users
     RESTART IDENTITY CASCADE
   `);

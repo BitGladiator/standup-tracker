@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
+const { securityHeaders } = require('../../middleware/security');
 
 const authRoutes = require('../../routes/auth');
 const standupRoutes = require('../../routes/standup');
@@ -13,7 +14,8 @@ const notificationRoutes = require('../../routes/notifications');
 const createTestServer = () => {
   const app = express();
 
-  app.use(express.json());
+  app.use(securityHeaders);
+  app.use(express.json({ limit: '10kb' }));
   app.use(cookieParser());
   app.use(cors());
 

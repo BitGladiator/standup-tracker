@@ -5,8 +5,8 @@
     "dev": "nodemon index.js",
     "start": "node index.js",
     "test": "cross-env NODE_ENV=test jest --runInBand",
-    "test:unit": "cross-env NODE_ENV=test jest --testPathPattern=unit --runInBand",
-    "test:integration": "cross-env NODE_ENV=test jest --testPathPattern=integration --runInBand",
+    "test:unit": "cross-env NODE_ENV=test jest --testPathPatterns=unit --runInBand",
+    "test:integration": "cross-env NODE_ENV=test jest --testPathPatterns=integration --runInBand",
     "test:coverage": "cross-env NODE_ENV=test jest --coverage --runInBand",
     "test:watch": "cross-env NODE_ENV=test jest --watch"
   },
