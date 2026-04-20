@@ -1,31 +1,31 @@
-version: '3.8'
+version: "3.8"
 
 services:
   server:
     build: ./server
     container_name: standup_server
     ports:
-      - '5500:5500'
-    env_file:
-      - ./server/.env
+      - "5500:5500"
     environment:
+      - PORT=5500
+      - NODE_ENV=production
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/standup_tracker
       - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
+      - CLIENT_URL=${CLIENT_URL}
+    volumes:
+      - server_logs:/var/log/standup-tracker
     depends_on:
       - postgres
       - redis
     restart: unless-stopped
-
-  client:
-    build: ./client
-    container_name: standup_client
-    ports:
-      - '5173:5173'
-    env_file:
-      - ./client/.env
-    depends_on:
-      - server
-    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "1.0"
 
   postgres:
     image: postgres:16-alpine
@@ -36,36 +36,149 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: standup_tracker
     ports:
-      - '5433:5432'
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./server/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
-    command: >
-      postgres
-        -c max_connections=200
-        -c shared_buffers=256MB
-        -c effective_cache_size=1GB
-        -c work_mem=4MB
-        -c maintenance_work_mem=64MB
-        -c checkpoint_completion_target=0.9
-        -c wal_buffers=16MB
-        -c default_statistics_target=100
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.5"
 
   redis:
     image: redis:7-alpine
     container_name: standup_redis
     restart: unless-stopped
     ports:
-      - '6379:6379'
+      - "6379:6379"
     command: >
       redis-server
-        --maxmemory 256mb
+        --maxmemory 128mb
         --maxmemory-policy allkeys-lru
-        --save 900 1
-        --save 300 10
     volumes:
       - redis_data:/data
+    deploy:
+      resources:
+        limits:
+          memory: 150M
+          cpus: "0.25"
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: standup_prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./observability/alerts.yml:/etc/prometheus/alerts.yml
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=7d"
+      - "--storage.tsdb.retention.size=512MB"
+      - "--web.enable-lifecycle"
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.5"
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: standup_grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+      - GF_ANALYTICS_CHECK_FOR_UPDATES=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+      - loki
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.5"
+
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: standup_loki
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./observability/loki.yml:/etc/loki/local-config.yaml
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.5"
+
+  promtail:
+    image: grafana/promtail:2.9.0
+    container_name: standup_promtail
+    restart: unless-stopped
+    volumes:
+      - ./observability/promtail.yml:/etc/promtail/config.yml
+      - server_logs:/var/log/standup-tracker
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: "0.25"
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: standup_alertmanager
+    restart: unless-stopped
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./observability/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: "0.25"
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: standup_node_exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)"
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+          cpus: "0.1"
 
 volumes:
   postgres_data:
   redis_data:
+  prometheus_data:
+  grafana_data:
+  loki_data:
+  server_logs:

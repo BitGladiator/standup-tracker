@@ -75,7 +75,7 @@ const standupOperations = new promClient.Counter({
   registers: [register],
 });
 
-// Groq scoring duration
+
 const scoringDuration = new promClient.Histogram({
   name: 'standup_scoring_duration_seconds',
   help: 'Time taken to score a standup via Groq',
@@ -83,7 +83,7 @@ const scoringDuration = new promClient.Histogram({
   registers: [register],
 });
 
-// DB query duration
+
 const dbQueryDuration = new promClient.Histogram({
   name: 'db_query_duration_seconds',
   help: 'Duration of database queries',

@@ -1,0 +1,86 @@
+groups:
+  - name: standup_tracker_alerts
+    rules:
+
+    
+      - alert: HighErrorRate
+        expr: |
+          rate(http_errors_total[5m]) / rate(http_requests_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} over the last 5 minutes"
+
+     
+      - alert: SlowResponses
+        expr: |
+          histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow p99 response time"
+          description: "p99 latency is {{ $value }}s"
+
+   
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service instance is down"
+          description: "{{ $labels.instance }} has been down for more than 1 minute"
+
+     
+      - alert: HighMemoryUsage
+        expr: |
+          standup_tracker_nodejs_heap_size_used_bytes /
+          standup_tracker_nodejs_heap_size_total_bytes > 0.85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High heap memory usage"
+          description: "Heap usage is at {{ $value | humanizePercentage }}"
+
+
+      - alert: DBPoolExhausted
+        expr: |
+          standup_tracker_nodejs_active_handles_total > 25
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "DB connection pool near exhaustion"
+
+     
+      - alert: RateLimitSpike
+        expr: rate(rate_limit_hits_total[5m]) > 10
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Rate limit spike detected"
+          description: "{{ $value }} rate limit hits per second on {{ $labels.limiter }}"
+
+   
+      - alert: GitHubAPIErrors
+        expr: |
+          rate(github_api_calls_total{status="error"}[5m]) > 0.5
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "GitHub API error rate elevated"
+
+      - alert: CronJobFailing
+        expr: |
+          rate(cron_job_executions_total{status="failure"}[1h]) > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Cron job {{ $labels.job }} is failing"
