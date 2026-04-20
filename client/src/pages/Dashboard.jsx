@@ -284,7 +284,7 @@ const Dashboard = () => {
       </motion.div>
 
     
-      {/* Full Contribution Heatmap */}
+   
       {heatmapData && (
         <motion.div className={styles.heatmapSection} variants={itemVariants}>
           <div className={styles.chartHeader}>

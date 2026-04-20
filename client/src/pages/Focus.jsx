@@ -23,7 +23,7 @@ const Focus = () => {
     skipBreak,
   } = usePomodoro();
 
-  // Pass phase so audio engine auto-switches on phase change
+  
   const audioEngine = useAudioEngine(phase);
 
   useEffect(() => {

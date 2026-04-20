@@ -14,7 +14,7 @@ const Journal = () => {
     how_it_was_done: '',
     notes: '',
   });
-  const [status, setStatus] = useState('idle'); // 'idle', 'saving', 'saved', 'error'
+  const [status, setStatus] = useState('idle'); 
   const [lastSavedTime, setLastSavedTime] = useState(null);
 
   useEffect(() => {

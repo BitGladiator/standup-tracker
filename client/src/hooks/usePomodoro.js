@@ -5,9 +5,9 @@ const WORK_DURATION = 25 * 60;
 const BREAK_DURATION = 5 * 60;
 
 const usePomodoro = () => {
-  const [phase, setPhase] = useState('idle');      // idle | work | break | paused
+  const [phase, setPhase] = useState('idle');     
   const [secondsLeft, setSecondsLeft] = useState(WORK_DURATION);
-  const [activePhase, setActivePhase] = useState('work'); // tracks work or break even when paused
+  const [activePhase, setActivePhase] = useState('work'); 
   const [pomodoroCount, setPomodoroCount] = useState(0);
   const [label, setLabel] = useState('');
   const [sessions, setSessions] = useState([]);
@@ -71,13 +71,12 @@ const usePomodoro = () => {
     return () => clearTimer();
   }, [phase, persistSession]);
 
-  // Fresh start — only called when idle with no prior session
+
   const start = () => {
     if (phase === 'paused') {
-      // Resume from where we left off
       setPhase(activePhase);
     } else {
-      // Brand new session
+ 
       startedAtRef.current = new Date();
       setActivePhase('work');
       setPhase('work');
@@ -87,13 +86,13 @@ const usePomodoro = () => {
 
   const pause = () => {
     clearTimer();
-    setPhase('paused'); // separate state — does NOT reset seconds
+    setPhase('paused');
   };
 
   const reset = useCallback(() => {
     clearTimer();
 
-    // Save partial work session if the user was mid-work (running or paused)
+  
     if (startedAtRef.current && (phase === 'work' || (phase === 'paused' && activePhase === 'work'))) {
       const endedAt = new Date();
       const elapsedSeconds = WORK_DURATION - secondsLeft;

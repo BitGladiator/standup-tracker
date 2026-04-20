@@ -9,7 +9,6 @@ services:
     env_file:
       - ./server/.env
     environment:
-      # Overriding the local URLs from .env to use Docker internal network hostnames
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/standup_tracker
       - REDIS_URL=redis://redis:6379
     depends_on:

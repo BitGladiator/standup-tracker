@@ -268,12 +268,12 @@
   color: var(--text-h);
 }
 
-/* Heatmap action card */
+
 .heatmapCard {
   background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
 }
 
-/* Inline heatmap section on dashboard */
+
 .heatmapSection {
   background: var(--bg);
   border: 1px solid var(--border);

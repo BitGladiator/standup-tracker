@@ -91,7 +91,7 @@ const ContributionHeatmap = ({ data }) => {
           viewBox={`0 0 ${svgW} ${svgH}`}
           style={{ display: 'block', minWidth: '600px' }}
         >
-          {/* Day labels */}
+
           {DAY_LABELS.map((label, i) => (
             <text
               key={i}
@@ -150,7 +150,7 @@ const ContributionHeatmap = ({ data }) => {
           )}
         </svg>
 
-        {/* Legend */}
+
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '8px', justifyContent: 'flex-end' }}>
           <span style={{ fontSize: '10px', color: '#a0aec0', marginRight: '4px' }}>Less</span>
           {['#ebedf0', '#c6e1f3', '#79b8ff', '#388bfd', '#1f6feb', '#0d419d'].map((c) => (
@@ -160,7 +160,7 @@ const ContributionHeatmap = ({ data }) => {
         </div>
       </div>
 
-      {/* Tooltip */}
+
       {tooltip && (
         <div style={{
           position: 'fixed',
