@@ -3,7 +3,27 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "nodemon index.js",
-    "start": "node index.js"
+    "start": "node index.js",
+    "test": "cross-env NODE_ENV=test jest --runInBand",
+    "test:unit": "cross-env NODE_ENV=test jest --testPathPattern=unit --runInBand",
+    "test:integration": "cross-env NODE_ENV=test jest --testPathPattern=integration --runInBand",
+    "test:coverage": "cross-env NODE_ENV=test jest --coverage --runInBand",
+    "test:watch": "cross-env NODE_ENV=test jest --watch"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testTimeout": 30000,
+    "collectCoverageFrom": [
+      "services/**/*.js",
+      "middleware/**/*.js",
+      "routes/**/*.js"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "lines": 70,
+        "functions": 70
+      }
+    }
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -28,6 +48,10 @@
     "winston-loki": "^6.1.4"
   },
   "devDependencies": {
-    "nodemon": "^3.0.0"
+    "@jest/globals": "^30.3.0",
+    "cross-env": "^10.1.0",
+    "jest": "^30.3.0",
+    "nodemon": "^3.0.0",
+    "supertest": "^7.2.2"
   }
 }
