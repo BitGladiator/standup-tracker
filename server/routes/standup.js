@@ -3,6 +3,7 @@ const authenticate = require('../middleware/authenticate');
 const { fetchGithubActivity } = require('../services/githubService');
 const { generateStandupDraft } = require('../services/standupGenerator');
 const { sendStandupToSlack } = require('../services/slackService');
+const { standupScoringQueue } = require('../queues/index');
 const { scoreStandup } = require('../services/standupScorer');
 const db = require('../db');
 
@@ -70,35 +71,27 @@ router.post('/', authenticate, async (req, res) => {
 
     
     const io = req.app.get('io');
-    setImmediate(async () => {
-      try {
-        const score = await scoreStandup(saved);
-
-       
-        const { rows: scoreRows } = await db.query(
-          `INSERT INTO standup_scores (
-            user_id, standup_id, overall_score, grade,
-            clarity_score, specificity_score, blocker_quality_score, completeness_score,
-            clarity_feedback, specificity_feedback, blocker_feedback,
-            completeness_feedback, overall_feedback
-          ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
-          ON CONFLICT DO NOTHING
-          RETURNING *`,
-          [
-            req.userId, saved.id, score.overall_score, score.grade,
-            score.clarity_score, score.specificity_score,
-            score.blocker_quality_score, score.completeness_score,
-            score.clarity_feedback, score.specificity_feedback,
-            score.blocker_feedback, score.completeness_feedback,
-            score.overall_feedback,
-          ]
-        );
-
-       
-        io.to(`user:${req.userId}`).emit('standup_score', scoreRows[0]);
-      } catch (err) {
-        console.error('Scoring failed:', err.message);
+    const job = await standupScoringQueue.add(
+      {
+        standup: saved,
+        userId: req.userId,
+      },
+      {
+        attempts: 3,                    
+        backoff: {
+          type: 'exponential',
+          delay: 2000,                 
+        },
+        removeOnComplete: 100,        
+        removeOnFail: 50,               
+        timeout: 30000,                
       }
+    );
+    
+    logger.info('Standup scoring job queued', {
+      jobId: job.id,
+      standupId: saved.id,
+      userId: req.userId,
     });
 
     res.json(saved);
