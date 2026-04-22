@@ -14,6 +14,7 @@ const { register, activeWebSocketConnections, cronJobExecutions } = require('./o
 const { getPoolStats } = require('./db/index');
 const bullBoardAdapter = require('./queues/bullBoard');
 const { prReminderQueue } = require('./queues/index');
+const { getBufferedEvents, clearBufferedEvents } = require('./services/eventBuffer');
 
 
 require('./queues/workers/standupScoringWorker');
@@ -63,9 +64,24 @@ app.use('/admin/queues', bullBoardAdapter.getRouter());
 io.on('connection', (socket) => {
   activeWebSocketConnections.inc();
 
-  socket.on('join', (userId) => {
+  socket.on('join', async (userId) => {
     socket.join(`user:${userId}`);
     logger.debug('User joined room', { userId });
+
+
+    try {
+      const missed = await getBufferedEvents(userId);
+      if (missed.length > 0) {
+        logger.info('Replaying missed events', { userId, count: missed.length });
+        missed.forEach(({ event, data }) => {
+          socket.emit(event, data);
+        });
+       
+        await clearBufferedEvents(userId);
+      }
+    } catch (err) {
+      logger.error('Failed to replay events', { userId, error: err.message });
+    }
   });
 
   socket.on('disconnect', () => {

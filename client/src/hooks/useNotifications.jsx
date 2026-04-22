@@ -7,12 +7,11 @@ import {
   markAllAsRead,
 } from '../api/client';
 
-let socket = null;
-
 const useNotifications = (userId) => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
+  const [connected, setConnected] = useState(false);
 
   useEffect(() => {
     if (!userId) return;
@@ -24,20 +23,39 @@ const useNotifications = (userId) => {
   useEffect(() => {
     if (!userId) return;
 
-    socket = io(import.meta.env.VITE_API_URL, { withCredentials: true });
+    const socket = io(import.meta.env.VITE_API_URL, {
+      withCredentials: true,
+      transports: ['websocket'],
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,        
+      reconnectionDelayMax: 30000,   
+      randomizationFactor: 0.5,    
+    });
 
     socket.on('connect', () => {
+      setConnected(true);
       socket.emit('join', userId);
     });
+
+    socket.on('disconnect', () => {
+      setConnected(false);
+    });
+
+    socket.on('reconnect', (attemptNumber) => {
+      console.log(`Reconnected after ${attemptNumber} attempts`);
+    });
+
+    socket.on('reconnect_error', (err) => {
+      console.error('Reconnection failed:', err.message);
+    });
+
     socket.on('notifications', (newOnes) => {
       setNotifications((prev) => [...newOnes, ...prev]);
       setUnreadCount((prev) => prev + newOnes.length);
     });
 
-    return () => {
-      socket?.disconnect();
-      socket = null;
-    };
+    return () => socket.disconnect();
   }, [userId]);
 
   const handleMarkAsRead = useCallback(async (id) => {
@@ -59,6 +77,7 @@ const useNotifications = (userId) => {
     unreadCount,
     open,
     setOpen,
+    connected,
     handleMarkAsRead,
     handleMarkAllAsRead,
   };

@@ -3,11 +3,10 @@ const { scoreStandup } = require('../../services/standupScorer');
 const db = require('../../db');
 const logger = require('../../observability/logger');
 const { scoringDuration, cronJobExecutions } = require('../../observability/metrics');
+const { emitToUser } = require('../../services/socketEmitter');
 
-
-// 2 standups can be scored simultaneously
 standupScoringQueue.process(2, async (job) => {
-  const { standup, userId, io } = job.data;
+  const { standup, userId } = job.data;
 
   logger.info('Processing standup scoring job', {
     jobId: job.id,
@@ -44,11 +43,10 @@ standupScoringQueue.process(2, async (job) => {
 
     await job.progress(90);
 
+   
+    
+    await emitToUser(globalIo, userId, 'standup_score', rows[0]);
 
-    const globalIo = require('../../index').io;
-    if (globalIo) {
-      globalIo.to(`user:${userId}`).emit('standup_score', rows[0]);
-    }
 
     end();
     await job.progress(100);
@@ -71,10 +69,9 @@ standupScoringQueue.process(2, async (job) => {
       standupId: standup.id,
       error: err.message,
     });
-    throw err; 
+    throw err;
   }
 });
-
 
 standupScoringQueue.on('completed', (job, result) => {
   logger.info('Scoring job completed', { jobId: job.id, result });
