@@ -19,6 +19,7 @@ const sessionRoutes = require('./routes/sessions');
 const settingsRoutes = require('./routes/settings');
 const notificationRoutes = require('./routes/notifications');
 const heatmapRoutes = require('./routes/heatmap');
+const { standupScoringQueue } = require('../queues/index');
 const { runPRReminders } = require('./services/prReminderService');
 
 const app = express();
