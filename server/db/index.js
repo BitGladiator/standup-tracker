@@ -40,4 +40,4 @@ const getPoolStats = () => ({
   waiting: pool.waitingCount,
 });
 
-module.exports = { query, getPoolStats, getClient: () => pool.connect() };
+module.exports = { query, getPoolStats, getClient: () => pool.connect(), end: () => pool.end() };

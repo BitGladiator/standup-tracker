@@ -6,6 +6,7 @@ const { sendStandupToSlack } = require('../services/slackService');
 const { standupScoringQueue } = require('../queues/index');
 const { scoreStandup } = require('../services/standupScorer');
 const db = require('../db');
+const logger = require('../observability/logger');
 
 const router = express.Router();
 

@@ -23,7 +23,8 @@
         "lines": 70,
         "functions": 70
       }
-    }
+    },
+    "setupFilesAfterEnv": ["<rootDir>/tests/helpers/setupAfterEnv.js"]
   },
   "dependencies": {
     "@bull-board/api": "^7.0.0",

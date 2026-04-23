@@ -28,4 +28,12 @@ const notificationQueue = new Bull('notifications', redisConfig);
   });
 });
 
-module.exports = { standupScoringQueue, prReminderQueue, notificationQueue };
+const closeAllQueues = async () => {
+  await Promise.all([
+    standupScoringQueue.close(),
+    prReminderQueue.close(),
+    notificationQueue.close()
+  ]);
+};
+
+module.exports = { standupScoringQueue, prReminderQueue, notificationQueue, closeAllQueues };
