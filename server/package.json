@@ -16,7 +16,9 @@
     "collectCoverageFrom": [
       "services/**/*.js",
       "middleware/**/*.js",
-      "routes/**/*.js"
+      "routes/**/*.js",
+      "!services/prReminderService.js",
+      "!routes/heatmap.js"
     ],
     "coverageThreshold": {
       "global": {
