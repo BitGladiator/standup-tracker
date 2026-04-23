@@ -55,8 +55,9 @@ services:
       - "6379:6379"
     command: >
       redis-server
-        --maxmemory 128mb
+        --maxmemory 256mb
         --maxmemory-policy allkeys-lru
+        --maxmemory-policy noeviction
     volumes:
       - redis_data:/data
     deploy:

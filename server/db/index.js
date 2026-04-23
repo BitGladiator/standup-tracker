@@ -39,5 +39,5 @@ const getPoolStats = () => ({
   idle: pool.idleCount,
   waiting: pool.waitingCount,
 });
-
-module.exports = { query, getPoolStats, getClient: () => pool.connect(), end: () => pool.end() };
+const end = () => pool.end();
+module.exports = { query, getPoolStats, getClient: () => pool.connect(), end };

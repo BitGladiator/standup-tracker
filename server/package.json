@@ -13,6 +13,8 @@
   "jest": {
     "testEnvironment": "node",
     "testTimeout": 30000,
+    "forceExit": true,
+    "setupFiles": ["<rootDir>/tests/helpers/loadEnv.js"],
     "collectCoverageFrom": [
       "services/**/*.js",
       "middleware/**/*.js",
