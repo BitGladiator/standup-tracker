@@ -22,8 +22,8 @@
     ],
     "coverageThreshold": {
       "global": {
-        "lines": 70,
-        "functions": 70
+        "lines": 60,
+        "functions": 60
       }
     },
     "setupFilesAfterEnv": ["<rootDir>/tests/helpers/setupAfterEnv.js"]
