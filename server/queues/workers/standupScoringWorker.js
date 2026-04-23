@@ -1,11 +1,12 @@
-const { standupScoringQueue } = require('../index');
+const { Worker } = require('bullmq');
 const { scoreStandup } = require('../../services/standupScorer');
 const db = require('../../db');
 const logger = require('../../observability/logger');
 const { scoringDuration, cronJobExecutions } = require('../../observability/metrics');
 const { emitToUser } = require('../../services/socketEmitter');
+const { connection } = require('../index');
 
-standupScoringQueue.process(2, async (job) => {
+const worker = new Worker('standup-scoring', async (job) => {
   const { standup, userId } = job.data;
 
   logger.info('Processing standup scoring job', {
@@ -17,10 +18,10 @@ standupScoringQueue.process(2, async (job) => {
   const end = scoringDuration.startTimer();
 
   try {
-    await job.progress(10);
+    await job.updateProgress(10);
 
     const score = await scoreStandup(standup);
-    await job.progress(70);
+    await job.updateProgress(70);
 
     const { rows } = await db.query(
       `INSERT INTO standup_scores (
@@ -41,15 +42,15 @@ standupScoringQueue.process(2, async (job) => {
       ]
     );
 
-    await job.progress(90);
+    await job.updateProgress(90);
 
-   
-    
-    await emitToUser(globalIo, userId, 'standup_score', rows[0]);
-
+    const globalIo = require('../../index').io;
+    if (globalIo) {
+      await emitToUser(globalIo, userId, 'standup_score', rows[0]);
+    }
 
     end();
-    await job.progress(100);
+    await job.updateProgress(100);
 
     logger.info('Standup scoring job completed', {
       jobId: job.id,
@@ -71,10 +72,14 @@ standupScoringQueue.process(2, async (job) => {
     });
     throw err;
   }
+}, { connection, concurrency: 2 });
+
+worker.on('completed', (job, result) => {
+  logger.info('Scoring job completed', { jobId: job.id, result });
 });
 
-standupScoringQueue.on('completed', (job, result) => {
-  logger.info('Scoring job completed', { jobId: job.id, result });
+worker.on('failed', (job, err) => {
+  logger.error('Scoring job failed permanently', { jobId: job.id, error: err.message });
 });
 
 logger.info('Standup scoring worker started');

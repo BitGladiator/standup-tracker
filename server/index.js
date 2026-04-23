@@ -135,6 +135,7 @@ app.use((err, req, res, next) => {
 
 cron.schedule('0 9 * * *', async () => {
   const job = await prReminderQueue.add(
+    'daily-pr-check',
     {},
     {
       attempts: 3,

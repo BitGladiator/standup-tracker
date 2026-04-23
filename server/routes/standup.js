@@ -73,6 +73,7 @@ router.post('/', authenticate, async (req, res) => {
     
     const io = req.app.get('io');
     const job = await standupScoringQueue.add(
+      'score-standup',
       {
         standup: saved,
         userId: req.userId,
@@ -85,7 +86,6 @@ router.post('/', authenticate, async (req, res) => {
         },
         removeOnComplete: 100,        
         removeOnFail: 50,               
-        timeout: 30000,                
       }
     );
     

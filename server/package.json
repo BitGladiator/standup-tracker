@@ -26,14 +26,15 @@
         "functions": 60
       }
     },
-    "setupFilesAfterEnv": ["<rootDir>/tests/helpers/setupAfterEnv.js"]
+    "setupFilesAfterEnv": [
+      "<rootDir>/tests/helpers/setupAfterEnv.js"
+    ]
   },
   "dependencies": {
     "@bull-board/api": "^7.0.0",
     "@bull-board/express": "^7.0.0",
     "bcryptjs": "^2.4.3",
-    "bull": "^4.16.5",
-    "bull-board": "^1.7.2",
+    "bullmq": "^5.76.1",
     "compression": "^1.8.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",

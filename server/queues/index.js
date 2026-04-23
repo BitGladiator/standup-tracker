@@ -1,39 +1,12 @@
-const Bull = require('bull');
+const { Queue, Worker, QueueEvents } = require('bullmq');
 
-const redisConfig = {
-  redis: process.env.REDIS_URL,
+const connection = {
+  host: new URL(process.env.REDIS_URL || 'redis://localhost:6379').hostname,
+  port: parseInt(new URL(process.env.REDIS_URL || 'redis://localhost:6379').port) || 6379,
 };
 
+const standupScoringQueue = new Queue('standup-scoring', { connection });
+const prReminderQueue = new Queue('pr-reminders', { connection });
+const notificationQueue = new Queue('notifications', { connection });
 
-const standupScoringQueue = new Bull('standup-scoring', redisConfig);
-
-
-const prReminderQueue = new Bull('pr-reminders', redisConfig);
-
-
-const notificationQueue = new Bull('notifications', redisConfig);
-
-
-[standupScoringQueue, prReminderQueue, notificationQueue].forEach((queue) => {
-  queue.on('error', (err) => {
-    console.error(`Queue error [${queue.name}]:`, err.message);
-  });
-
-  queue.on('failed', (job, err) => {
-    console.error(`Job failed [${queue.name}] job ${job.id}:`, err.message);
-  });
-
-  queue.on('stalled', (job) => {
-    console.warn(`Job stalled [${queue.name}] job ${job.id}`);
-  });
-});
-
-const closeAllQueues = async () => {
-  await Promise.all([
-    standupScoringQueue.close(),
-    prReminderQueue.close(),
-    notificationQueue.close()
-  ]);
-};
-
-module.exports = { standupScoringQueue, prReminderQueue, notificationQueue, closeAllQueues };
+module.exports = { Queue, Worker, QueueEvents, standupScoringQueue, prReminderQueue, notificationQueue, connection };
