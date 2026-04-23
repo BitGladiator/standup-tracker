@@ -13,7 +13,6 @@ const NotificationBell = ({ userId }) => {
 
   const ref = useRef(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClick = (e) => {
       if (ref.current && !ref.current.contains(e.target)) {
@@ -78,7 +77,7 @@ const NotificationBell = ({ userId }) => {
   )}
 </button>
 
-      {/* Dropdown panel */}
+  
       {open && (
         <div style={{
           position: 'absolute',

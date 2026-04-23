@@ -118,7 +118,7 @@ const ContributionHeatmap = ({ data }) => {
             </text>
           ))}
 
-          {/* Cells */}
+  
           {weeks.map((week, wi) =>
             week.map((day, di) => {
               if (!day) return null;

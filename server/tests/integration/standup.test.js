@@ -108,7 +108,6 @@ describe('POST /api/standup', () => {
       .set('Cookie', authCookie)
       .send({ yesterday: 'x'.repeat(50000) });
 
-    // express.json limit is 10kb
     expect(res.status).toBe(413);
   });
 });
