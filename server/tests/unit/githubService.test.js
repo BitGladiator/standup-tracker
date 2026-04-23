@@ -61,11 +61,11 @@ jest.mock('../../observability/logger', () => ({
     describe('fetchGithubActivity — cache miss', () => {
       beforeEach(() => {
         mockRedis.get.mockResolvedValue(null);
-        mockDb.query.mockResolvedValueOnce({ rows: [mockUser] });
-        mockDb.query.mockResolvedValue({ rows: [] });
       });
   
       test('fetches from GitHub when cache is empty', async () => {
+        mockDb.query.mockResolvedValueOnce({ rows: [mockUser] });
+        mockDb.query.mockResolvedValue({ rows: [] });
         global.fetch.mockResolvedValue(mockGithubResponse([]));
   
         await fetchGithubActivity(1);
@@ -74,6 +74,8 @@ jest.mock('../../observability/logger', () => ({
       });
   
       test('calls commits search API', async () => {
+        mockDb.query.mockResolvedValueOnce({ rows: [mockUser] });
+    mockDb.query.mockResolvedValue({ rows: [] });
         global.fetch.mockResolvedValue(mockGithubResponse([]));
   
         await fetchGithubActivity(1);
@@ -83,6 +85,8 @@ jest.mock('../../observability/logger', () => ({
       });
   
       test('calls PRs search API', async () => {
+        mockDb.query.mockResolvedValueOnce({ rows: [mockUser] });
+        mockDb.query.mockResolvedValue({ rows: [] });
         global.fetch.mockResolvedValue(mockGithubResponse([]));
   
         await fetchGithubActivity(1);
@@ -92,6 +96,8 @@ jest.mock('../../observability/logger', () => ({
       });
   
       test('caches result in Redis after fetch', async () => {
+        mockDb.query.mockResolvedValueOnce({ rows: [mockUser] });
+        mockDb.query.mockResolvedValue({ rows: [] });
         global.fetch.mockResolvedValue(mockGithubResponse([]));
   
         await fetchGithubActivity(1);
@@ -104,6 +110,8 @@ jest.mock('../../observability/logger', () => ({
       });
   
       test('shapes commit data correctly', async () => {
+        mockDb.query.mockResolvedValueOnce({ rows: [mockUser] });
+    mockDb.query.mockResolvedValue({ rows: [] });
         const mockCommit = {
           commit: {
             message: 'fix auth bug\n\ndetailed description',
@@ -124,13 +132,14 @@ jest.mock('../../observability/logger', () => ({
       });
   
       test('throws when user not found in DB', async () => {
-        mockRedis.get.mockResolvedValue(null);
         mockDb.query.mockResolvedValueOnce({ rows: [] }); 
   
         await expect(fetchGithubActivity(999)).rejects.toThrow('User not found');
       });
   
       test('handles GitHub API error gracefully', async () => {
+        mockDb.query.mockResolvedValueOnce({ rows: [mockUser] });
+    mockDb.query.mockResolvedValue({ rows: [] });
         global.fetch.mockResolvedValue({
           ok: false,
           status: 403,

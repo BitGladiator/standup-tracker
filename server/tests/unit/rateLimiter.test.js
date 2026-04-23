@@ -94,8 +94,8 @@ describe('rateLimiter middleware', () => {
       expect(res.status).toHaveBeenCalledWith(429);
     });
 
-    test('has stricter limit than global — 10 requests per 15 minutes', () => {
-      expect(authLimiter._config.max).toBe(10);
+    test('has stricter limit than global — 100 requests per 15 minutes', () => {
+      expect(authLimiter._config.max).toBe(100);
       expect(authLimiter._config.windowMs).toBe(15 * 60 * 1000);
     });
 
@@ -124,8 +124,8 @@ describe('rateLimiter middleware', () => {
       expect(keyGen(req)).toBe('user:127.0.0.1');
     });
 
-    test('is limited to 10 requests per hour', () => {
-      expect(githubLimiter._config.max).toBe(10);
+    test('is limited to 100 requests per hour', () => {
+      expect(githubLimiter._config.max).toBe(100);
       expect(githubLimiter._config.windowMs).toBe(60 * 60 * 1000);
     });
   });
