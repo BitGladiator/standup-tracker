@@ -5,7 +5,7 @@ const cookieParser = require('cookie-parser');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 const cron = require('node-cron');
-
+const { execSync } = require('child_process');
 const { securityHeaders, compress } = require('./middleware/security');
 const { globalLimiter, authLimiter, githubLimiter, speedLimiter } = require('./middleware/rateLimiter');
 const requestMetrics = require('./middleware/requestMetrics');
@@ -88,7 +88,20 @@ io.on('connection', (socket) => {
     activeWebSocketConnections.dec();
   });
 });
-
+const runMigrations = () => {
+  try {
+    logger.info('Running database migrations...');
+    execSync('npm run migrate:up', {
+      cwd: __dirname,
+      stdio: 'inherit',
+      env: { ...process.env },
+    });
+    logger.info('Migrations completed successfully');
+  } catch (err) {
+    logger.error('Migration failed', { error: err.message });
+    process.exit(1); 
+  }
+};
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/standup', standupRoutes);
 app.use('/api/sessions', sessionRoutes);
@@ -151,7 +164,7 @@ app.post('/api/notifications/trigger-check', async (req, res) => {
   const job = await prReminderQueue.add({}, { attempts: 1 });
   res.json({ success: true, jobId: job.id });
 });
-
+runMigrations();
 const PORT = process.env.PORT || 5500;
 httpServer.listen(PORT, () =>
   logger.info('Server started', { port: PORT })

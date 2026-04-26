@@ -2,14 +2,17 @@
   "name": "server",
   "version": "1.0.0",
   "scripts": {
-    "dev": "nodemon index.js",
-    "start": "node index.js",
-    "test": "cross-env NODE_ENV=test jest --runInBand",
-    "test:unit": "cross-env NODE_ENV=test jest --testPathPatterns=unit --runInBand",
-    "test:integration": "cross-env NODE_ENV=test jest --testPathPatterns=integration --runInBand",
-    "test:coverage": "cross-env NODE_ENV=test jest --coverage --runInBand",
-    "test:watch": "cross-env NODE_ENV=test jest --watch"
-  },
+  "dev": "nodemon index.js",
+  "start": "node index.js",
+  "migrate:up": "node-pg-migrate up 2>&1 | grep -v \"Can't determine timestamp\"",
+  "migrate:down": "node-pg-migrate down 2>&1 | grep -v \"Can't determine timestamp\"",
+  "migrate:create": "node-pg-migrate create",
+  "migrate:status": "node-pg-migrate status",
+  "test": "cross-env NODE_ENV=test jest --runInBand",
+  "test:unit": "cross-env NODE_ENV=test jest --testPathPatterns=unit --runInBand",
+  "test:integration": "cross-env NODE_ENV=test jest --testPathPatterns=integration --runInBand",
+  "test:coverage": "cross-env NODE_ENV=test jest --coverage --runInBand"
+},
   "jest": {
     "testEnvironment": "node",
     "testTimeout": 30000,
