@@ -81,3 +81,12 @@ CREATE TABLE IF NOT EXISTS notifications (
   read BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT NOW()
 );
+
+
+CREATE INDEX IF NOT EXISTS idx_standups_user_date ON standups (user_id, date DESC);
+CREATE INDEX IF NOT EXISTS idx_focus_sessions_user_started ON focus_sessions (user_id, started_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_read ON notifications (user_id, read, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_github_activity_user ON github_activity (user_id, fetched_at DESC);
+CREATE INDEX IF NOT EXISTS idx_standup_scores_user ON standup_scores (user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_standup_scores_standup ON standup_scores (standup_id);
+CREATE INDEX IF NOT EXISTS idx_journals_user_date ON journals (user_id, date DESC);

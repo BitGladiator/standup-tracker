@@ -1,5 +1,5 @@
 exports.up = async (pgm) => {
-    pgm.createTable('journal_entries', {
+    pgm.createTable('journals', {
       id: { type: 'serial', primaryKey: true },
       user_id: {
         type: 'integer',
@@ -7,25 +7,26 @@ exports.up = async (pgm) => {
         onDelete: 'CASCADE',
       },
       date: { type: 'date', notNull: true, default: pgm.func('CURRENT_DATE') },
-      content: { type: 'text', notNull: true },
-      mood: { type: 'varchar(20)' },
+      problems_solved: { type: 'text' },
+      how_it_was_done: { type: 'text' },
+      notes: { type: 'text' },
       created_at: { type: 'timestamp', default: pgm.func('NOW()') },
       updated_at: { type: 'timestamp', default: pgm.func('NOW()') },
     });
   
     pgm.addConstraint(
-      'journal_entries',
-      'journal_entries_user_date_unique',
+      'journals',
+      'journals_user_id_date_key',
       'UNIQUE (user_id, date)'
     );
   
-    pgm.createIndex('journal_entries', ['user_id', 'date'], {
-      name: 'idx_journal_entries_user_date',
+    pgm.createIndex('journals', ['user_id', 'date'], {
+      name: 'idx_journals_user_date',
       order: { date: 'DESC' },
     });
   };
   
   exports.down = async (pgm) => {
-    pgm.dropIndex('journal_entries', [], { name: 'idx_journal_entries_user_date' });
-    pgm.dropTable('journal_entries');
+    pgm.dropIndex('journals', [], { name: 'idx_journals_user_date' });
+    pgm.dropTable('journals');
   };

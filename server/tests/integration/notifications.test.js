@@ -141,8 +141,6 @@ describe('PUT /api/notifications/:id/read', () => {
     await request(app)
       .put(`/api/notifications/${notification.id}/read`)
       .set('Cookie', authCookie);
-
-    // Verify it was NOT marked as read
     const { rows } = await db.query(
       'SELECT read FROM notifications WHERE id = $1',
       [notification.id]
