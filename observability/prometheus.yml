@@ -1,8 +1,7 @@
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
-  
-remote_write_receiver: true
+
 alerting:
   alertmanagers:
     - static_configs:
