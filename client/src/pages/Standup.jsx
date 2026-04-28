@@ -49,10 +49,16 @@ const Standup = () => {
     handleGenerate,
     handleChange,
     handleSave,
-  } = useStandup({ onSaveSuccess: () => {
-    setScore(null);
-    setScoreLoading(true);
-  }});
+  } = useStandup({
+    onSaveSuccess: () => {
+      setScore(null);
+      setScoreLoading(true);
+    },
+    onScoreLoaded: (existingScore) => {
+      setScore(existingScore);
+      setScoreLoading(false);
+    },
+  });
 
   const isLoading = status === 'loading';
   const isGenerating = status === 'generating';

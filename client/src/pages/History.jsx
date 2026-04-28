@@ -87,9 +87,23 @@ const History = () => {
                     </span>
                   )}
                 </div>
-                <span style={{ color: '#a0aec0', fontSize: '12px' }}>
-                  {expanded === standup.id ? '▲' : '▼'}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  {standup.overall_score != null && (
+                    <span style={{
+                      fontSize: '12px',
+                      fontWeight: '600',
+                      padding: '2px 10px',
+                      borderRadius: '99px',
+                      background: standup.grade === 'A' ? '#F0FFF4' : standup.grade === 'B' ? '#EBF8FF' : standup.grade === 'C' ? '#FEFCBF' : '#FFF5F5',
+                      color: standup.grade === 'A' ? '#276749' : standup.grade === 'B' ? '#2B6CB0' : standup.grade === 'C' ? '#744210' : '#9B2335',
+                    }}>
+                      {standup.overall_score}/100 · {standup.grade}
+                    </span>
+                  )}
+                  <span style={{ color: '#a0aec0', fontSize: '12px' }}>
+                    {expanded === standup.id ? '▲' : '▼'}
+                  </span>
+                </div>
               </div>
 
               {expanded === standup.id && (
@@ -97,6 +111,16 @@ const History = () => {
                   <Section title="Yesterday" content={standup.yesterday} />
                   <Section title="Today" content={standup.today} />
                   <Section title="Blockers" content={standup.blockers} />
+                  {standup.overall_feedback && (
+                    <div style={{ marginTop: '16px', padding: '12px', background: '#F7FAFC', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                      <div style={{ fontSize: '11px', fontWeight: '600', color: '#718096', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
+                        AI Feedback
+                      </div>
+                      <p style={{ fontSize: '13px', color: '#4a5568', lineHeight: '1.6', margin: 0, fontStyle: 'italic' }}>
+                        "{standup.overall_feedback}"
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

@@ -24,7 +24,15 @@ router.get('/generate', authenticate, async (req, res) => {
 router.get('/today', authenticate, async (req, res) => {
   try {
     const { rows } = await db.query(
-      `SELECT s.*, ss.overall_score, ss.grade
+      `SELECT s.*,
+         ss.overall_score, ss.grade,
+         ss.clarity_score, ss.specificity_score,
+         ss.blocker_quality_score, ss.completeness_score,
+         ss.clarity_feedback, ss.specificity_feedback,
+         ss.blocker_feedback, ss.completeness_feedback,
+         ss.overall_feedback,
+         ss.strengths, ss.improvements,
+         ss.agent_reasoning, ss.pipeline_meta
        FROM standups s
        LEFT JOIN standup_scores ss ON ss.standup_id = s.id
        WHERE s.user_id = $1 AND s.date = CURRENT_DATE`,
@@ -104,7 +112,14 @@ router.post('/', authenticate, async (req, res) => {
 router.get('/history', authenticate, async (req, res) => {
   try {
     const { rows } = await db.query(
-      `SELECT s.*, ss.overall_score, ss.grade, ss.overall_feedback
+      `SELECT s.*,
+         ss.overall_score, ss.grade, ss.overall_feedback,
+         ss.clarity_score, ss.specificity_score,
+         ss.blocker_quality_score, ss.completeness_score,
+         ss.clarity_feedback, ss.specificity_feedback,
+         ss.blocker_feedback, ss.completeness_feedback,
+         ss.strengths, ss.improvements,
+         ss.agent_reasoning, ss.pipeline_meta
        FROM standups s
        LEFT JOIN standup_scores ss ON ss.standup_id = s.id
        WHERE s.user_id = $1

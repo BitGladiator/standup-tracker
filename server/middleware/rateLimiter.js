@@ -40,7 +40,7 @@ const githubLimiter = rateLimit({
   legacyHeaders: false,
   store: makeStore('rl:github:'),
   validate: { ip: false },
-  keyGenerator: (req) => `user:${req.userId || req.ip}`,
+  keyGenerator: (req) => `user:${req.userId || req['ip']}`,
   message: { error: 'GitHub generate limit reached. Try again in an hour.' },
 });
 

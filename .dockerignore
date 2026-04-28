@@ -1,0 +1,31 @@
+# Client build artifacts
+client/node_modules
+client/dist
+client/.env*
+
+# Server
+server/node_modules
+server/coverage
+server/tests
+server/.env*
+server/logs
+
+# Git
+.git
+.gitignore
+.github
+
+# Docker
+docker-compose*.yml
+nginx/
+
+# Observability configs — mounted as volumes not baked in
+observability/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
