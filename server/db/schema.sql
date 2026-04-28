@@ -66,6 +66,10 @@ CREATE TABLE IF NOT EXISTS standup_scores (
   blocker_feedback TEXT,
   completeness_feedback TEXT,
   overall_feedback TEXT,
+  strengths JSONB DEFAULT '[]'::jsonb,
+  improvements JSONB DEFAULT '[]'::jsonb,
+  agent_reasoning JSONB,
+  pipeline_meta JSONB,
   created_at TIMESTAMP DEFAULT NOW()
 );
 
