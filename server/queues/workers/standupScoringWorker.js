@@ -25,7 +25,7 @@ const worker = new Worker(
     try {
       await job.updateProgress(10);
 
-      const score = await scoreStandup(standup);
+      const score = await scoreStandup(standup, userId);
       await job.updateProgress(70);
 
       const { rows } = await db.query(

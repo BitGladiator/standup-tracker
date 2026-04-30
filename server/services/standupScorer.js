@@ -1,13 +1,12 @@
 const { runScoringPipeline } = require('../agents/orchestrator');
 const logger = require('../observability/logger');
 
-const scoreStandup = async (standup) => {
-  logger.info('Scoring standup via multi-agent pipeline', {
+const scoreStandup = async (standup, userId) => {
+  logger.info('Scoring standup via full agentic pipeline', {
     standupId: standup.id,
+    userId,
   });
-
-  const result = await runScoringPipeline(standup);
-  return result;
+  return runScoringPipeline(standup, userId);
 };
 
 module.exports = { scoreStandup };

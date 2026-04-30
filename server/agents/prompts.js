@@ -103,5 +103,32 @@ const AGENT_PROMPTS = {
     "improvements": ["<improvement 1>", "<improvement 2>"]
   }`,
   };
+const buildAgentPrompt = (dimension, basePrompt, plannerContext) => {
+    if (!plannerContext) return basePrompt;
   
-module.exports = { AGENT_PROMPTS };
+    const instructions = plannerContext.agent_instructions?.[dimension];
+    const memory = plannerContext.memory_context;
+    const trend = plannerContext.context_gathered?.trend;
+  
+    let contextBlock = '';
+  
+    if (memory) {
+      contextBlock += `\nUSER HISTORY CONTEXT:\n${memory}\n`;
+    }
+  
+    if (trend && trend !== 'insufficient_data') {
+      contextBlock += `\nSCORE TREND: This user's scores are ${trend}.\n`;
+    }
+  
+    if (instructions?.focus_hint) {
+      contextBlock += `\nFOCUS HINT FROM PLANNER: ${instructions.focus_hint}\n`;
+    }
+  
+    if (instructions?.priority === 'high') {
+      contextBlock += `\nPRIORITY: The planner flagged this dimension as HIGH PRIORITY — be especially thorough.\n`;
+    }
+  
+    return basePrompt + contextBlock;
+};
+  
+module.exports = { AGENT_PROMPTS, buildAgentPrompt };
