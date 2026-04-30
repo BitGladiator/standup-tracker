@@ -3,6 +3,8 @@ const db = require('../../db');
 const setupTestDb = async () => {
   await db.query(`
     TRUNCATE TABLE
+      agent_tool_calls,
+      agent_memory,
       standup_scores,
       notifications,
       github_activity,
