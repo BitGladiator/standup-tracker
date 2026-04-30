@@ -9,6 +9,8 @@ describe('Database schema integrity', () => {
     'standup_scores',
     'notifications',
     'journals',
+    'agent_memory',
+    'agent_tool_calls',
   ];
 
   test('all expected tables exist', async () => {
@@ -48,6 +50,9 @@ describe('Database schema integrity', () => {
     expect(names).toContain('004_add_notifications');
     expect(names).toContain('005_add_indexes');
     expect(names).toContain('006_add_journal_entries');
+    expect(names).toContain('007_add_agent_scoring_fields');
+    expect(names).toContain('008_add_unique_standup_score');
+    expect(names).toContain('009_add_agent_memory');
   });
 
   test('users table has correct columns', async () => {

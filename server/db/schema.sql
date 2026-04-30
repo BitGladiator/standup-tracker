@@ -86,6 +86,27 @@ CREATE TABLE IF NOT EXISTS notifications (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS agent_memory (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  memory_type VARCHAR(50) NOT NULL,
+  content JSONB NOT NULL,
+  updated_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(user_id, memory_type)
+);
+
+CREATE TABLE IF NOT EXISTS agent_tool_calls (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  standup_id INTEGER REFERENCES standups(id) ON DELETE CASCADE,
+  agent_name VARCHAR(50) NOT NULL,
+  tool_name VARCHAR(50) NOT NULL,
+  tool_input JSONB,
+  tool_output JSONB,
+  duration_ms INTEGER,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
 
 CREATE INDEX IF NOT EXISTS idx_standups_user_date ON standups (user_id, date DESC);
 CREATE INDEX IF NOT EXISTS idx_focus_sessions_user_started ON focus_sessions (user_id, started_at DESC);
@@ -94,3 +115,5 @@ CREATE INDEX IF NOT EXISTS idx_github_activity_user ON github_activity (user_id,
 CREATE INDEX IF NOT EXISTS idx_standup_scores_user ON standup_scores (user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_standup_scores_standup ON standup_scores (standup_id);
 CREATE INDEX IF NOT EXISTS idx_journals_user_date ON journals (user_id, date DESC);
+CREATE INDEX IF NOT EXISTS idx_agent_memory_user_type ON agent_memory (user_id, memory_type);
+CREATE INDEX IF NOT EXISTS idx_tool_calls_user_standup ON agent_tool_calls (user_id, standup_id);
