@@ -20,3 +20,8 @@
 
 ## Github Actions Flow
 <img src="images/GitActionsFlow.jpg" width="700" />
+
+---
+
+## Standup Scoring flow
+<img src="images/StandupScoringFlow.jpg" width="700" />
