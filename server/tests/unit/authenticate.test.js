@@ -71,4 +71,31 @@ describe('authenticate middleware', () => {
 
     expect(res.status).toHaveBeenCalledWith(401);
   });
+
+  test('accepts valid token in Authorization header', () => {
+    const token = jwt.sign({ userId: 42 }, 'test_secret', { expiresIn: '1h' });
+    const req = {
+      headers: { authorization: `Bearer ${token}` }
+    };
+    const res = mockRes();
+    const next = jest.fn();
+
+    authenticate(req, res, next);
+
+    expect(next).toHaveBeenCalled();
+    expect(req.userId).toBe(42);
+  });
+
+  test('rejects request with invalid Authorization header', () => {
+    const req = {
+      headers: { authorization: 'Bearer invalid-token' }
+    };
+    const res = mockRes();
+    const next = jest.fn();
+
+    authenticate(req, res, next);
+
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(next).not.toHaveBeenCalled();
+  });
 });
