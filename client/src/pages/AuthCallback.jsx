@@ -37,7 +37,13 @@ const AuthCallback = () => {
     }
 
     exchangeToken(token)
-      .then(({ user }) => {
+      .then(({ user, token: sessionToken }) => {
+        // Store token so all subsequent API calls send it as Authorization: Bearer.
+        // sessionStorage persists across navigation within the same tab but is
+        // cleared when the browser closes — provides a good security/UX balance.
+        if (sessionToken) {
+          sessionStorage.setItem('auth_token', sessionToken);
+        }
         setUser(user);
         navigate('/dashboard', { replace: true });
       })

@@ -71,8 +71,6 @@ router.get('/callback', async (req, res) => {
 });
 
 
-// The frontend lands here after OAuth redirect, extracts the token from the URL,
-// and POSTs it here. We verify it and set the real long-lived httpOnly cookie.
 router.post('/exchange', async (req, res) => {
   const { token } = req.body;
   if (!token) return res.status(400).json({ error: 'Token required' });
@@ -85,10 +83,10 @@ router.post('/exchange', async (req, res) => {
     );
     if (!rows[0]) return res.status(401).json({ error: 'User not found' });
 
-    // Issue the real 7-day session cookie on a JSON response (NOT a redirect).
-    // Browsers properly store Set-Cookie from JSON responses; they drop it on redirects.
     const sessionToken = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
     const isHttps = process.env.CLIENT_URL?.startsWith('https://');
+
+    // Set httpOnly cookie (works in Chrome and same-origin)
     res.cookie('token', sessionToken, {
       httpOnly: true,
       secure: isHttps,
@@ -96,7 +94,10 @@ router.post('/exchange', async (req, res) => {
       sameSite: isHttps ? 'none' : 'lax',
     });
 
-    res.json({ ok: true, user: rows[0] });
+    // ALSO return token in body: frontend stores it in sessionStorage and sends
+    // it as Authorization: Bearer header. This works in Safari (ITP blocks
+    // third-party cookies) and all cross-origin scenarios where cookies fail.
+    res.json({ ok: true, user: rows[0], token: sessionToken });
   } catch {
     res.status(401).json({ error: 'Invalid or expired token' });
   }
@@ -115,15 +116,14 @@ router.post('/logout', (req, res) => {
 });
 
 
-router.get('/me', async (req, res) => {
-  const token = req.cookies.token;
-  if (!token) return res.status(401).json({ error: 'Not authenticated' });
-
+// Refactored to use authenticate middleware so it accepts both
+// httpOnly cookie (Chrome) and Authorization header (Safari / cross-origin)
+const authenticate = require('../middleware/authenticate');
+router.get('/me', authenticate, async (req, res) => {
   try {
-    const { userId } = jwt.verify(token, process.env.JWT_SECRET);
     const { rows } = await db.query(
       'SELECT id, username, avatar_url FROM users WHERE id = $1',
-      [userId]
+      [req.userId]
     );
     if (!rows[0]) return res.status(401).json({ error: 'User not found' });
     res.json(rows[0]);

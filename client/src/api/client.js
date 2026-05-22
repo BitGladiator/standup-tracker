@@ -1,16 +1,27 @@
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 const apiFetch = async (path, options = {}) => {
+  // Read token from sessionStorage on every call.
+  // This is the cross-origin safe auth mechanism — works in Safari (ITP),
+  // Chrome, Firefox, and any browser where cross-origin cookies are blocked.
+  const storedToken = sessionStorage.getItem('auth_token');
+
   const res = await fetch(`${BASE_URL}/api${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      // Send as Authorization header — CORS explicitly allows this header
+      ...(storedToken ? { Authorization: `Bearer ${storedToken}` } : {}),
       ...options.headers,
     },
     credentials: 'include',
   });
 
   if (!res.ok) {
+    // If the token is rejected, clear it so we don't keep sending a bad one
+    if (res.status === 401) {
+      sessionStorage.removeItem('auth_token');
+    }
     const error = await res.json().catch(() => ({ error: 'Request failed' }));
     throw error;
   }
@@ -19,7 +30,11 @@ const apiFetch = async (path, options = {}) => {
 };
 
 export const getMe = () => apiFetch('/auth/me');
-export const logout = () => apiFetch('/auth/logout', { method: 'POST' });
+export const logout = () => {
+  // Clear stored token on logout so it isn't sent on future requests
+  sessionStorage.removeItem('auth_token');
+  return apiFetch('/auth/logout', { method: 'POST' });
+};
 export const exchangeToken = (token) =>
   apiFetch('/auth/exchange', { method: 'POST', body: JSON.stringify({ token }) });
 

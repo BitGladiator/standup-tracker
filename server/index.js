@@ -52,7 +52,12 @@ const allowedOrigins = [
 // CORS must be registered BEFORE helmet and all other middleware.
 // Helmet intercepts preflight OPTIONS requests before CORS can respond,
 // causing browsers to block credentialed cross-origin requests (cookie never sent).
-app.use(cors({ origin: allowedOrigins, credentials: true }));
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+  // Explicitly allow Authorization header so Safari can send Bearer tokens cross-origin
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.use(securityHeaders);
 app.use(compress);
 app.use(requestMetrics);
