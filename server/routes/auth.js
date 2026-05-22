@@ -57,11 +57,14 @@ router.get('/callback', async (req, res) => {
       expiresIn: '7d',
     });
 
+    const isProduction = process.env.NODE_ENV === 'production';
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production' && process.env.CLIENT_URL.startsWith('https'),
-      maxAge: 7 * 24 * 60 * 60 * 1000, 
-      sameSite: 'lax',
+      secure: isProduction,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      // 'none' required for cross-origin cookies (Vercel frontend <-> Render backend)
+      // 'lax' only works when frontend and backend share the same domain
+      sameSite: isProduction ? 'none' : 'lax',
     });
 
 
@@ -74,7 +77,13 @@ router.get('/callback', async (req, res) => {
 
 
 router.post('/logout', (req, res) => {
-  res.clearCookie('token');
+  const isProduction = process.env.NODE_ENV === 'production';
+  // Must mirror the same options used when setting the cookie, otherwise browser won't clear it
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+  });
   res.json({ success: true });
 });
 

@@ -27,10 +27,12 @@ const transports = [
   }),
 ];
 
-if (!isDev) {
+
+const logDir = process.env.LOG_DIR;
+if (!isDev && logDir) {
   transports.push(
     new winston.transports.File({
-      filename: '/var/log/standup-tracker/error.log',
+      filename: `${logDir}/error.log`,
       level: 'error',
       format: prodFormat,
       maxsize: 10 * 1024 * 1024,
@@ -38,7 +40,7 @@ if (!isDev) {
       tailable: true,
     }),
     new winston.transports.File({
-      filename: '/var/log/standup-tracker/combined.log',
+      filename: `${logDir}/combined.log`,
       format: prodFormat,
       maxsize: 10 * 1024 * 1024,
       maxFiles: 10,
