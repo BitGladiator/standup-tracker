@@ -8,7 +8,10 @@ const securityHeaders = helmet({
       connectSrc: ["'self'", 'https://api.github.com'],
     },
   },
-  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  // Do NOT set crossOriginResourcePolicy here — it blocks credentialed
+  // cross-origin cookie requests between Vercel (frontend) and Render (backend).
+  // CORS middleware handles cross-origin access control instead.
+  crossOriginResourcePolicy: false,
 });
 
 const compress = compression({

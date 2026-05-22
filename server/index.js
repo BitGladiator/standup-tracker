@@ -48,12 +48,15 @@ const allowedOrigins = [
   'http://localhost:5173',
 ].filter(Boolean);
 
+// CORS must be registered BEFORE helmet and all other middleware.
+// Helmet intercepts preflight OPTIONS requests before CORS can respond,
+// causing browsers to block credentialed cross-origin requests (cookie never sent).
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(securityHeaders);
 app.use(compress);
 app.use(requestMetrics);
 app.use(globalLimiter);
 app.use(speedLimiter);
-app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json({ limit: '10kb' }));
 app.use(cookieParser());
 app.set('io', io);
@@ -103,12 +106,13 @@ const runMigrations = () => {
   }
 };
 app.use('/api/auth', authLimiter, authRoutes);
+// githubLimiter must be registered BEFORE standupRoutes, not after
+app.use('/api/standup/generate', githubLimiter);
 app.use('/api/standup', standupRoutes);
 app.use('/api/sessions', sessionRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/heatmap', heatmapRoutes);
-app.use('/api/standup/generate', githubLimiter);
 
 app.get('/metrics', async (req, res) => {
   res.setHeader('Content-Type', register.contentType);
