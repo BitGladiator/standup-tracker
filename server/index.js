@@ -26,6 +26,7 @@ const sessionRoutes = require('./routes/sessions');
 const settingsRoutes = require('./routes/settings');
 const notificationRoutes = require('./routes/notifications');
 const heatmapRoutes = require('./routes/heatmap');
+const journalRoutes = require('./routes/journals');
 
 const app = express();
 const httpServer = createServer(app);
@@ -113,6 +114,7 @@ app.use('/api/sessions', sessionRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/heatmap', heatmapRoutes);
+app.use('/api/journals', journalRoutes);
 
 app.get('/metrics', async (req, res) => {
   res.setHeader('Content-Type', register.contentType);
