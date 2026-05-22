@@ -66,6 +66,14 @@ body {
   box-sizing: border-box;
 }
 
+/* Login page needs a true full-screen layout — bypass the root width constraint */
+body.login-page-active #root {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  border-inline: none;
+}
+
 h1,
 h2 {
   font-family: var(--heading);
