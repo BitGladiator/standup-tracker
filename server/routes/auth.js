@@ -53,22 +53,17 @@ router.get('/callback', async (req, res) => {
 
     const user = rows[0];
 
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
-      expiresIn: '7d',
+    // Sign a short-lived token (5 min) used ONLY for the exchange handshake.
+    // The frontend will immediately exchange it for a proper httpOnly cookie.
+    const tempToken = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
+      expiresIn: '5m',
     });
 
-    const isProduction = process.env.NODE_ENV === 'production';
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: isProduction,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      // 'none' required for cross-origin cookies (Vercel frontend <-> Render backend)
-      // 'lax' only works when frontend and backend share the same domain
-      sameSite: isProduction ? 'none' : 'lax',
-    });
-
-
-    res.redirect(`${process.env.CLIENT_URL}/dashboard`);
+    // CROSS-ORIGIN OAUTH FIX:
+    // Browsers silently drop Set-Cookie headers on cross-origin 302 redirects.
+    // Solution: redirect with the token as a URL param → frontend calls /exchange
+    // → server sets the httpOnly cookie on a real JSON response (browsers store these).
+    res.redirect(`${process.env.CLIENT_URL}/auth/callback?token=${tempToken}`);
   } catch (err) {
     console.error('Auth error:', err);
     res.redirect(`${process.env.CLIENT_URL}/login?error=auth_failed`);
@@ -76,13 +71,45 @@ router.get('/callback', async (req, res) => {
 });
 
 
+// The frontend lands here after OAuth redirect, extracts the token from the URL,
+// and POSTs it here. We verify it and set the real long-lived httpOnly cookie.
+router.post('/exchange', async (req, res) => {
+  const { token } = req.body;
+  if (!token) return res.status(400).json({ error: 'Token required' });
+
+  try {
+    const { userId } = jwt.verify(token, process.env.JWT_SECRET);
+    const { rows } = await db.query(
+      'SELECT id, username, avatar_url FROM users WHERE id = $1',
+      [userId]
+    );
+    if (!rows[0]) return res.status(401).json({ error: 'User not found' });
+
+    // Issue the real 7-day session cookie on a JSON response (NOT a redirect).
+    // Browsers properly store Set-Cookie from JSON responses; they drop it on redirects.
+    const sessionToken = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const isHttps = process.env.CLIENT_URL?.startsWith('https://');
+    res.cookie('token', sessionToken, {
+      httpOnly: true,
+      secure: isHttps,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      sameSite: isHttps ? 'none' : 'lax',
+    });
+
+    res.json({ ok: true, user: rows[0] });
+  } catch {
+    res.status(401).json({ error: 'Invalid or expired token' });
+  }
+});
+
+
 router.post('/logout', (req, res) => {
-  const isProduction = process.env.NODE_ENV === 'production';
-  // Must mirror the same options used when setting the cookie, otherwise browser won't clear it
+  const isHttps = process.env.CLIENT_URL?.startsWith('https://');
+  // Must mirror the exact same options used when setting the cookie
   res.clearCookie('token', {
     httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? 'none' : 'lax',
+    secure: isHttps,
+    sameSite: isHttps ? 'none' : 'lax',
   });
   res.json({ success: true });
 });

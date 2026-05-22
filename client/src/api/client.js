@@ -20,6 +20,8 @@ const apiFetch = async (path, options = {}) => {
 
 export const getMe = () => apiFetch('/auth/me');
 export const logout = () => apiFetch('/auth/logout', { method: 'POST' });
+export const exchangeToken = (token) =>
+  apiFetch('/auth/exchange', { method: 'POST', body: JSON.stringify({ token }) });
 
 export const generateStandup = () => apiFetch('/standup/generate');
 export const getTodayStandup = () => apiFetch('/standup/today');

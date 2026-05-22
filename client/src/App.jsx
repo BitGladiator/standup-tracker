@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth.jsx';
 import Login from './pages/Login.jsx';
+import AuthCallback from './pages/AuthCallback.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Standup from './pages/Standup.jsx';
 import Focus from './pages/Focus.jsx';
@@ -23,6 +24,7 @@ const App = () => {
   return (
     <Routes>
       <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
+      <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/standup" element={<ProtectedRoute><Standup /></ProtectedRoute>} />
       <Route path="/focus" element={<ProtectedRoute><Focus /></ProtectedRoute>} />
