@@ -19,7 +19,9 @@ const ProtectedRoute = ({ children }) => {
 
 const App = () => {
   const { user, loading } = useAuth();
-  if (loading) return <div style={{ padding: 32 }}>Loading...</div>;
+  const hasToken = sessionStorage.getItem('auth_token');
+  if (loading && hasToken) return <div style={{ padding: 32 }}>Loading...</div>;
+
 
   return (
     <Routes>
