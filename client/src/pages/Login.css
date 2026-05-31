@@ -1,6 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 .login-root {
   position: fixed;
@@ -8,87 +8,105 @@
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  font-family: 'Inter', system-ui, sans-serif;
-  background: #0d0d14;
+  font-family: 'Space Grotesk', sans-serif;
+  background: #ffffff;
   z-index: 9999;
+  display: flex;
+  --left-width: max(42%, 380px);
+  --right-width: calc(100% - var(--left-width));
+  --col-width: calc(var(--right-width) / 5);
 }
 
 
-.login-bg {
+
+.login-staircase-container {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center;
+  filter: drop-shadow(4px 0 24px rgba(0, 0, 0, 0.04));
   z-index: 1;
-}
-
-
-.login-root::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: transparent;
-  z-index: 2;
   pointer-events: none;
 }
 
-
-.login-card-wrapper {
-  position: relative;
-  z-index: 3;
+.login-staircase-bg {
   width: 100%;
   height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-right: 12%;
-  box-sizing: border-box;
+  background: #fafbfe;
+  clip-path: polygon(
+    0% 0%,
+    var(--left-width) 0%,
+    var(--left-width) 25%,
+    calc(var(--left-width) + var(--col-width)) 25%,
+    calc(var(--left-width) + var(--col-width)) 50%,
+    calc(var(--left-width) + 2 * var(--col-width)) 50%,
+    calc(var(--left-width) + 2 * var(--col-width)) 75%,
+    calc(var(--left-width) + 3 * var(--col-width)) 75%,
+    calc(var(--left-width) + 3 * var(--col-width)) 100%,
+    0% 100%
+  );
 }
 
+
+
+.login-left {
+  width: var(--left-width);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 40px;
+  box-sizing: border-box;
+  position: relative;
+  background: transparent;
+  z-index: 2;
+}
+
+.login-branding {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: absolute;
+  top: 32px;
+  left: 40px;
+}
+
+.login-branding-icon {
+  width: 26px;
+  height: 26px;
+  color: #223a5e;
+}
+
+.login-branding-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e1b4b;
+  letter-spacing: -0.2px;
+}
+
+.login-right {
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  z-index: 2;
+}
 
 .login-card {
   width: 100%;
-  max-width: 420px;
+  max-width: 400px;
   padding: 44px 40px;
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow:
-    0 20px 40px rgba(31, 23, 71, 0.08),
-    0 8px 16px rgba(139, 92, 246, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    0 20px 40px rgba(0, 0, 0, 0.05),
+    0 8px 16px rgba(0, 0, 0, 0.03);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
   will-change: transform;
 }
-
-
-.login-logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 32px;
-  justify-content: center;
-}
-
-.login-logo-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  filter: drop-shadow(0 4px 12px rgba(139, 92, 246, 0.3));
-}
-
-.login-logo-text {
-  font-size: 19px;
-  font-weight: 700;
-  letter-spacing: -0.3px;
-  color: #1e1b4b;
-}
-
 
 .login-title {
   font-size: 28px !important;
@@ -96,10 +114,7 @@
   letter-spacing: -0.5px !important;
   margin: 0 0 10px !important;
   color: #1e1b4b !important;
-  background: linear-gradient(135deg, #1e1b4b 30%, #6d28d9);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  -webkit-text-fill-color: #1e1b4b !important;
   line-height: 1.25 !important;
   text-align: center;
 }
@@ -111,7 +126,6 @@
   margin: 0 0 36px 0 !important;
   text-align: center;
 }
-
 
 .login-github-btn {
   display: flex;
@@ -125,12 +139,11 @@
   font-weight: 600;
   color: #ffffff;
   text-decoration: none;
-  background: linear-gradient(135deg, #7c3aed, #4f46e5);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #223a5e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow:
-    0 4px 20px rgba(124, 58, 237, 0.35),
-    0 2px 4px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    0 4px 20px rgba(34, 58, 94, 0.2),
+    0 2px 4px rgba(0, 0, 0, 0.05);
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -140,32 +153,20 @@
   margin-bottom: 24px;
 }
 
-.login-github-btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), transparent 60%);
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-
 .login-github-btn:hover {
   transform: translateY(-2px);
+  background: #2c4b7a;
   box-shadow:
-    0 8px 30px rgba(124, 58, 237, 0.5),
-    0 4px 10px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
-
-.login-github-btn:hover::before {
-  opacity: 1;
+    0 8px 30px rgba(34, 58, 94, 0.3),
+    0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .login-github-btn:active {
   transform: translateY(0);
+  background: #182942;
   box-shadow:
-    0 2px 10px rgba(124, 58, 237, 0.3),
-    inset 0 2px 4px rgba(0, 0, 0, 0.25);
+    0 2px 10px rgba(34, 58, 94, 0.15),
+    inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .login-github-icon {
@@ -188,7 +189,6 @@
   opacity: 1;
 }
 
-
 .login-trust {
   display: flex;
   align-items: center;
@@ -206,23 +206,28 @@
   color: #64748b;
 }
 
-
-
 @media (max-width: 900px) {
-  .login-card-wrapper {
-    justify-content: center;
-    padding-right: 0;
-    padding: 24px;
+  .login-root {
+    flex-direction: column;
+  }
+
+  .login-staircase-container {
+    display: none;
+  }
+
+  .login-left {
+    width: 100%;
+    min-width: unset;
+    background: #fafbfe;
+    box-shadow: none;
+  }
+
+  .login-right {
+    display: none;
   }
 
   .login-card {
     max-width: 400px;
     padding: 36px 28px;
-    background: rgba(255, 255, 255, 0.85); 
-  }
-
-  .login-root::after {
-  
-    background: rgba(13, 13, 20, 0.4);
   }
 }

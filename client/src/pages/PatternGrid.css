@@ -1,0 +1,233 @@
+.pattern-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  width: 100%;
+  height: 100%;
+  gap: 1px;
+}
+
+.grid-cell {
+  position: relative;
+  overflow: hidden;
+  background: #ffffff;
+  outline: 1px solid #e4e2eb;
+}
+
+
+.grid-cell-empty {
+  background: transparent;
+  outline: none;
+  pointer-events: none;
+}
+
+.grid-cell-empty::before {
+  display: none;
+}
+
+
+.grid-cell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+
+
+
+.pattern-hstripes::before {
+  background: repeating-linear-gradient(
+    0deg,
+    var(--bg)  0   18px,
+    var(--c1) 18px 36px,
+    var(--c2) 36px 54px
+  );
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 2.5s ease;
+}
+
+.pattern-hstripes:hover::before {
+  clip-path: inset(0);
+  transition: clip-path 0.25s ease-out;
+}
+
+
+.pattern-vstripes::before {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--bg)  0   18px,
+    var(--c1) 18px 36px,
+    var(--c2) 36px 54px
+  );
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 2.5s ease;
+}
+
+.pattern-vstripes:hover::before {
+  clip-path: inset(0);
+  transition: clip-path 0.25s ease-out;
+}
+
+
+
+.pattern-diagstripes::before {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--bg)  0   16px,
+    var(--c1) 16px 32px,
+    var(--c2) 32px 48px
+  );
+  clip-path: inset(0 100% 100% 0);
+  transition: clip-path 2.5s ease;
+}
+
+.pattern-diagstripes:hover::before {
+  clip-path: inset(0);
+  transition: clip-path 0.25s ease-out;
+}
+
+
+.pattern-sunburst::before {
+  background: repeating-conic-gradient(
+    from 0deg,
+    var(--bg)  0deg  30deg,
+    var(--c1) 30deg  60deg,
+    var(--c2) 60deg  90deg
+  );
+  clip-path: circle(0% at 50% 50%);
+  transition: clip-path 2.5s ease;
+}
+
+.pattern-sunburst:hover::before {
+  clip-path: circle(150% at 50% 50%);
+  transition: clip-path 0.25s ease-out;
+}
+
+
+
+.pattern-checker::before {
+  background-image: conic-gradient(
+    var(--c1) 25%,
+    var(--c2) 25% 50%,
+    var(--c1) 50% 75%,
+    var(--c2) 75%
+  );
+  background-size: 50px 50px;
+  clip-path: circle(0% at 50% 50%);
+  transition: clip-path 2.5s ease;
+}
+
+.pattern-checker:hover::before {
+  clip-path: circle(150% at 50% 50%);
+  transition: clip-path 0.25s ease-out;
+}
+
+
+.pattern-squares::before {
+  background:
+    linear-gradient(var(--c1), var(--c1)) no-repeat center / 14% 14%,
+    linear-gradient(var(--bg), var(--bg)) no-repeat center / 28% 28%,
+    linear-gradient(var(--c2), var(--c2)) no-repeat center / 42% 42%,
+    linear-gradient(var(--c1), var(--c1)) no-repeat center / 56% 56%,
+    linear-gradient(var(--bg), var(--bg)) no-repeat center / 70% 70%,
+    linear-gradient(var(--c2), var(--c2)) no-repeat center / 84% 84%,
+    var(--c1);
+  clip-path: circle(0% at 50% 50%);
+  transition: clip-path 2.5s ease;
+}
+
+.pattern-squares:hover::before {
+  clip-path: circle(150% at 50% 50%);
+  transition: clip-path 0.25s ease-out;
+}
+
+
+
+.pattern-starburst::before {
+  background: repeating-conic-gradient(
+    from 0deg,
+    var(--c1) 0deg  15deg,
+    var(--c2) 15deg 30deg
+  );
+  clip-path: circle(0% at 50% 50%);
+  transition: clip-path 2.5s ease;
+}
+
+.pattern-starburst:hover::before {
+  clip-path: circle(150% at 50% 50%);
+  transition: clip-path 0.25s ease-out;
+}
+
+
+
+
+.pattern-diamonds::before {
+  background:
+    linear-gradient(
+      45deg,
+      var(--c1) 25%, transparent 25%,
+      transparent 75%, var(--c1) 75%
+    ) 0 0 / 60px 60px,
+    linear-gradient(
+      -45deg,
+      var(--c1) 25%, transparent 25%,
+      transparent 75%, var(--c1) 75%
+    ) 0 0 / 60px 60px;
+  background-color: var(--c2);
+  clip-path: inset(100% 0 0 0);
+  transition: clip-path 2.5s ease;
+}
+
+.pattern-diamonds:hover::before {
+  clip-path: inset(0);
+  transition: clip-path 0.25s ease-out;
+}
+
+
+.pattern-boldgrid::before {
+  background:
+    repeating-linear-gradient(
+      0deg,
+      var(--c1) 0 6px,
+      transparent 6px 50px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      var(--c1) 0 6px,
+      transparent 6px 50px
+    );
+  background-color: var(--c2);
+  clip-path: inset(50%);
+  transition: clip-path 2.5s ease;
+}
+
+.pattern-boldgrid:hover::before {
+  clip-path: inset(0);
+  transition: clip-path 0.25s ease-out;
+}
+
+
+
+.pattern-chevron::before {
+  background:
+    linear-gradient(135deg, var(--c1) 25%, transparent 25%) -25px 0 / 50px 50px,
+    linear-gradient(225deg, var(--c1) 25%, transparent 25%) -25px 0 / 50px 50px,
+    linear-gradient(315deg, var(--c2) 25%, transparent 25%)   0   0 / 50px 50px,
+    linear-gradient( 45deg, var(--c2) 25%, transparent 25%)   0   0 / 50px 50px;
+  background-color: var(--bg);
+  clip-path: inset(0 0 0 100%);
+  transition: clip-path 2.5s ease;
+}
+
+.pattern-chevron:hover::before {
+  clip-path: inset(0);
+  transition: clip-path 0.25s ease-out;
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .grid-cell::before {
+    transition-duration: 0.01ms !important;
+  }
+}
