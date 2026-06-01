@@ -10,9 +10,11 @@ import Settings from './pages/Settings.jsx';
 import Heatmap from './pages/Heatmap.jsx';
 import Journal from './pages/Journal.jsx';
 import ScoreTrend from './pages/ScoreTrend.jsx';
+import Loader from './components/Loader.jsx';
+
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
-  if (loading) return <div style={{ padding: 32 }}>Loading...</div>;
+  if (loading) return <Loader text="Verifying session..." />;
   if (!user) return <Navigate to="/login" replace />;
   return children;
 };
@@ -20,7 +22,8 @@ const ProtectedRoute = ({ children }) => {
 const App = () => {
   const { user, loading } = useAuth();
   const hasToken = sessionStorage.getItem('auth_token');
-  if (loading && hasToken) return <div style={{ padding: 32 }}>Loading...</div>;
+  if (loading && hasToken) return <Loader text="Connecting to your account..." />;
+
 
 
   return (

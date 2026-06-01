@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getScoreTrend } from "../api/client.js";
+import Loader from "../components/Loader.jsx";
 
 const gradeColor = (score) => {
   if (score >= 85) return "#48BB78";
@@ -22,7 +23,8 @@ const ScoreTrend = () => {
   }, []);
 
   if (loading)
-    return <div style={{ padding: "40px", color: "#718096" }}>Loading...</div>;
+    return <Loader text="Loading trend data..." />;
+
 
   const W = 640;
   const H = 200;

@@ -4,6 +4,8 @@ import { useAuth } from '../hooks/useAuth.jsx';
 import useStandup from '../hooks/useStandup.js';
 import { io } from 'socket.io-client';
 import StandupScore from '../components/StandupScore.jsx';
+import Loader from '../components/Loader.jsx';
+
 
 const fieldStyle = {
   width: '100%',
@@ -101,12 +103,9 @@ const Standup = () => {
   });
 
   if (isLoading) {
-    return (
-      <div style={{ padding: '40px', textAlign: 'center', color: '#718096' }}>
-        Loading...
-      </div>
-    );
+    return <Loader text="Loading your standup page..." />;
   }
+
 
   return (
     <div style={{ maxWidth: '720px', margin: '0 auto', padding: '40px 24px' }}>

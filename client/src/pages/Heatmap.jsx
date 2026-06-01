@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.jsx';
 import { getHeatmap } from '../api/client.js';
 import ContributionHeatmap from '../components/ContributionHeatmap.jsx';
+import Loader from '../components/Loader.jsx';
 
 const Heatmap = () => {
   const navigate = useNavigate();
@@ -46,10 +47,9 @@ const Heatmap = () => {
       </div>
 
       {loading && (
-        <div style={{ textAlign: 'center', padding: '60px', color: '#a0aec0', fontSize: '14px' }}>
-          Loading your activity...
-        </div>
+        <Loader text="Loading your activity..." />
       )}
+
 
       {error && (
         <div style={{ background: '#FFF5F5', border: '1px solid #FED7D7', borderRadius: '8px', padding: '14px', color: '#C53030', fontSize: '13px' }}>

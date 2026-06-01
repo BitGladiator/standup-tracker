@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getStandupHistory } from '../api/client.js';
+import Loader from '../components/Loader.jsx';
 
 const History = () => {
   const navigate = useNavigate();
@@ -28,8 +29,9 @@ const History = () => {
   };
 
   if (loading) {
-    return <div style={{ padding: '40px', color: '#718096' }}>Loading history...</div>;
+    return <Loader text="Loading history..." />;
   }
+
 
   return (
     <div style={{ maxWidth: '720px', margin: '0 auto', padding: '40px 24px' }}>

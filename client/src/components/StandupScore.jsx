@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Loader from './Loader.jsx';
 
 const StandupScore = ({ score, loading }) => {
   const [showReasoning, setShowReasoning] = useState(false);
@@ -17,15 +18,14 @@ const StandupScore = ({ score, loading }) => {
   if (loading) {
     return (
       <div style={{ background: '#F7FAFC', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px', marginTop: '24px', textAlign: 'center' }}>
-        <div style={{ fontSize: '13px', color: '#a0aec0', marginBottom: '8px' }}>
-          Analysing your standup across 5 agents...
-        </div>
-        <div style={{ fontSize: '11px', color: '#cbd5e0' }}>
+        <Loader text="Analysing your standup across 5 agents..." />
+        <div style={{ fontSize: '11px', color: '#cbd5e0', marginTop: '-12px' }}>
           Clarity · Specificity · Blockers · Completeness · Critic review
         </div>
       </div>
     );
   }
+
 
   if (!score) return null;
 
