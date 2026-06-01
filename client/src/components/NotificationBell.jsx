@@ -35,7 +35,7 @@ const NotificationBell = ({ userId }) => {
   return (
     <div ref={ref} style={{ position: 'relative' }}>
 
-      {/* Bell button */}
+  
       <button
   onClick={() => setOpen((o) => !o)}
   style={{
