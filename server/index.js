@@ -49,13 +49,10 @@ const allowedOrigins = [
   'http://localhost:5173',
 ].filter(Boolean);
 
-// CORS must be registered BEFORE helmet and all other middleware.
-// Helmet intercepts preflight OPTIONS requests before CORS can respond,
-// causing browsers to block credentialed cross-origin requests (cookie never sent).
+
 app.use(cors({
   origin: allowedOrigins,
   credentials: true,
-  // Explicitly allow Authorization header so Safari can send Bearer tokens cross-origin
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use(securityHeaders);
@@ -112,7 +109,6 @@ const runMigrations = () => {
   }
 };
 app.use('/api/auth', authLimiter, authRoutes);
-// githubLimiter must be registered BEFORE standupRoutes, not after
 app.use('/api/standup/generate', githubLimiter);
 app.use('/api/standup', standupRoutes);
 app.use('/api/sessions', sessionRoutes);

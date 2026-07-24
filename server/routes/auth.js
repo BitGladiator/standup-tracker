@@ -53,16 +53,11 @@ router.get('/callback', async (req, res) => {
 
     const user = rows[0];
 
-    // Sign a short-lived token (5 min) used ONLY for the exchange handshake.
-    // The frontend will immediately exchange it for a proper httpOnly cookie.
+   
     const tempToken = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
       expiresIn: '5m',
     });
 
-    // CROSS-ORIGIN OAUTH FIX:
-    // Browsers silently drop Set-Cookie headers on cross-origin 302 redirects.
-    // Solution: redirect with the token as a URL param → frontend calls /exchange
-    // → server sets the httpOnly cookie on a real JSON response (browsers store these).
     res.redirect(`${process.env.CLIENT_URL}/auth/callback?token=${tempToken}`);
   } catch (err) {
     console.error('Auth error:', err);

@@ -300,7 +300,7 @@ const Dashboard = () => {
         </motion.div>
       )}
 
-      <motion.div variants={itemVariants} style={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
+      {/* <motion.div variants={itemVariants} style={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
         <button
           onClick={() => triggerPRCheck().then(() => alert('PR check triggered! Check your notifications.'))}
           className={styles.testButton}
@@ -308,7 +308,7 @@ const Dashboard = () => {
           <BellRing size={14} />
           Trigger PR check (test)
         </button>
-      </motion.div>
+      </motion.div> */}
 
     </motion.div>
   );
