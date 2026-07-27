@@ -4,6 +4,7 @@ import usePomodoro from '../hooks/usePomodoro.js';
 import useAudioEngine from '../hooks/useAudioEngine.js';
 import AudioPlayer from '../components/AudioPlayer.jsx';
 import { getTodaySessions } from '../api/client.js';
+import './Focus.css';
 
 const Focus = () => {
   const navigate = useNavigate();
@@ -53,7 +54,7 @@ const Focus = () => {
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
   return (
-    <div style={{ maxWidth: '560px', margin: '0 auto', padding: '40px 24px' }}>
+    <div className="focus-page" style={{ maxWidth: '560px', margin: '0 auto', padding: '40px 24px' }}>
 
       <div style={{ marginBottom: '40px' }}>
         <button

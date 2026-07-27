@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { 
-  ArrowLeft, BookOpen, Lightbulb, Wrench, FileText, CheckCircle2, Clock 
+import {
+  ArrowLeft, BookOpen, Lightbulb, Wrench, FileText, CheckCircle2, Clock, AlertCircle
 } from 'lucide-react';
 import { getTodayJournal, saveJournal } from '../api/client';
 import styles from './Journal.module.css';
@@ -14,7 +14,7 @@ const Journal = () => {
     how_it_was_done: '',
     notes: '',
   });
-  const [status, setStatus] = useState('idle'); 
+  const [status, setStatus] = useState('idle');
   const [lastSavedTime, setLastSavedTime] = useState(null);
 
   useEffect(() => {
@@ -40,7 +40,7 @@ const Journal = () => {
   const handleSave = async () => {
     setStatus('saving');
     try {
-      const data = await saveJournal(formData);
+      await saveJournal(formData);
       setStatus('saved');
       setLastSavedTime(new Date());
     } catch (err) {
@@ -53,37 +53,42 @@ const Journal = () => {
     weekday: 'long', month: 'short', day: 'numeric',
   });
 
-  const timeFormatted = lastSavedTime 
+  const timeFormatted = lastSavedTime
     ? lastSavedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     : null;
 
   return (
-    <motion.div 
+    <motion.div
       className={styles.container}
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
       transition={{ duration: 0.3 }}
     >
+      {/* ── Header ── */}
       <div className={styles.header}>
         <button onClick={() => navigate('/dashboard')} className={styles.backButton}>
           <ArrowLeft size={16} />
         </button>
         <h1 className={styles.title}>
-          <BookOpen size={20} color="var(--accent)" />
+          <BookOpen size={18} color="var(--accent)" />
           Daily Journal
         </h1>
-        <div className={styles.dateDisplay}>
-          {formattedDate}
-        </div>
+        <span className={styles.dateBadge}>{formattedDate}</span>
       </div>
 
-      <div className={styles.form}>
-        <div className={styles.formGroup}>
-          <label className={styles.label}>
-            <Wrench size={16} color="#ef4444" />
-            Problems Solved / Overcome
-          </label>
+      {/* ── Form Card ── */}
+      <div className={styles.formCard}>
+
+        {/* Problems Solved */}
+        <div className={styles.formSection}>
+          <div className={styles.sectionHeader}>
+            <span className={`${styles.sectionIconWrap} ${styles.red}`}>
+              <Wrench size={14} />
+            </span>
+            <span className={styles.sectionLabel}>Problems Solved / Overcome</span>
+            <span className={styles.sectionHint}>Required</span>
+          </div>
           <textarea
             name="problems_solved"
             className={styles.textarea}
@@ -93,11 +98,15 @@ const Journal = () => {
           />
         </div>
 
-        <div className={styles.formGroup}>
-          <label className={styles.label}>
-            <Lightbulb size={16} color="#eab308" />
-            How It Was Done
-          </label>
+        {/* How It Was Done */}
+        <div className={styles.formSection}>
+          <div className={styles.sectionHeader}>
+            <span className={`${styles.sectionIconWrap} ${styles.yellow}`}>
+              <Lightbulb size={14} />
+            </span>
+            <span className={styles.sectionLabel}>How It Was Done</span>
+            <span className={styles.sectionHint}>Detail your approach</span>
+          </div>
           <textarea
             name="how_it_was_done"
             className={styles.textarea}
@@ -107,40 +116,51 @@ const Journal = () => {
           />
         </div>
 
-        <div className={styles.formGroup}>
-          <label className={styles.label}>
-            <FileText size={16} color="#3b82f6" />
-            General Notes
-          </label>
+        {/* General Notes */}
+        <div className={styles.formSection}>
+          <div className={styles.sectionHeader}>
+            <span className={`${styles.sectionIconWrap} ${styles.blue}`}>
+              <FileText size={14} />
+            </span>
+            <span className={styles.sectionLabel}>General Notes</span>
+            <span className={styles.sectionHint}>Optional</span>
+          </div>
           <textarea
             name="notes"
-            className={styles.textarea}
-            style={{ minHeight: '80px' }}
+            className={`${styles.textarea} ${styles.notesTextarea}`}
             value={formData.notes}
             onChange={handleChange}
             placeholder="Thoughts, observations, or memos outside of the primary problems"
           />
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <button 
-            className={styles.saveButton} 
+        {/* Footer */}
+        <div className={styles.formFooter}>
+          <button
+            className={styles.saveButton}
             onClick={handleSave}
             disabled={status === 'saving'}
           >
-            {status === 'saving' ? 'Saving...' : 'Save Entry'}
+            {status === 'saving' ? <Clock size={13} /> : <CheckCircle2 size={13} />}
+            {status === 'saving' ? 'Saving…' : 'Save Entry'}
           </button>
-          
+
           {status === 'saved' && (
-            <span className={styles.statusIndicator}>
-              <CheckCircle2 size={14} />
+            <span className={`${styles.statusChip} ${styles.saved}`}>
+              <CheckCircle2 size={12} />
               Saved at {timeFormatted}
             </span>
           )}
           {status === 'saving' && (
-            <span className={`${styles.statusIndicator} ${styles.saving}`}>
-              <Clock size={14} />
-              Saving...
+            <span className={`${styles.statusChip} ${styles.saving}`}>
+              <Clock size={12} />
+              Saving…
+            </span>
+          )}
+          {status === 'error' && (
+            <span className={`${styles.statusChip} ${styles.error}`}>
+              <AlertCircle size={12} />
+              Failed to save
             </span>
           )}
         </div>

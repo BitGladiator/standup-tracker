@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getScoreTrend } from "../api/client.js";
 import Loader from "../components/Loader.jsx";
+import './ScoreTrend.css';
 
 const gradeColor = (score) => {
   if (score >= 85) return "#48BB78";
@@ -53,7 +54,7 @@ const ScoreTrend = () => {
     : 0;
 
   return (
-    <div style={{ maxWidth: "720px", margin: "0 auto", padding: "40px 24px" }}>
+    <div className="score-trend-page" style={{ maxWidth: "720px", margin: "0 auto", padding: "40px 24px" }}>
       <button
         onClick={() => navigate("/standup")}
         style={{

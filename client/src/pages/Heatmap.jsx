@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth.jsx';
 import { getHeatmap } from '../api/client.js';
 import ContributionHeatmap from '../components/ContributionHeatmap.jsx';
 import Loader from '../components/Loader.jsx';
+import './Heatmap.css';
 
 const Heatmap = () => {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ const Heatmap = () => {
   }, []);
 
   return (
-    <div style={{ maxWidth: '900px', margin: '0 auto', padding: '40px 24px' }}>
+    <div className="heatmap-page" style={{ maxWidth: '900px', margin: '0 auto', padding: '40px 24px' }}>
 
       <div style={{ marginBottom: '32px' }}>
         <button

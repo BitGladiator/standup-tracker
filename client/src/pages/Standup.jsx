@@ -5,7 +5,7 @@ import useStandup from '../hooks/useStandup.js';
 import { io } from 'socket.io-client';
 import StandupScore from '../components/StandupScore.jsx';
 import Loader from '../components/Loader.jsx';
-
+import './Standup.css';
 
 const fieldStyle = {
   width: '100%',
@@ -108,7 +108,7 @@ const Standup = () => {
 
 
   return (
-    <div style={{ maxWidth: '720px', margin: '0 auto', padding: '40px 24px' }}>
+    <div className="standup-page" style={{ maxWidth: '720px', margin: '0 auto', padding: '40px 24px' }}>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
         <div>

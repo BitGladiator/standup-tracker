@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getStandupHistory } from '../api/client.js';
 import Loader from '../components/Loader.jsx';
+import './History.css';
 
 const History = () => {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ const History = () => {
 
 
   return (
-    <div style={{ maxWidth: '720px', margin: '0 auto', padding: '40px 24px' }}>
+    <div className="history-page" style={{ maxWidth: '720px', margin: '0 auto', padding: '40px 24px' }}>
 
       <button
         onClick={() => navigate('/dashboard')}

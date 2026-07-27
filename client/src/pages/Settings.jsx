@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getSettings, saveSettings } from '../api/client.js';
+import './Settings.css';
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ const Settings = () => {
   };
 
   return (
-    <div style={{ maxWidth: '560px', margin: '0 auto', padding: '40px 24px' }}>
+    <div className="settings-page" style={{ maxWidth: '560px', margin: '0 auto', padding: '40px 24px' }}>
 
       <button
         onClick={() => navigate('/dashboard')}
