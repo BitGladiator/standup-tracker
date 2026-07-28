@@ -1,0 +1,7 @@
+{
+  "watch": ["*.js", "routes", "services", "middleware", "queues", "db", "agents", "observability"],
+  "ext": "js,json",
+  "ignore": ["node_modules", "tests"],
+  "legacyWatch": true,
+  "delay": 500
+}
