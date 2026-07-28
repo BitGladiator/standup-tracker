@@ -6,14 +6,13 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   max: 30,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 5000,
   keepAlive: true,
 });
 
 pool.on('connect', () => logger.debug('New DB connection established'));
 pool.on('error', (err) => {
-  logger.error('Unexpected DB error', { error: err.message });
-  process.exit(-1);
+  logger.error('Unexpected DB pool error', { error: err.message });
 });
 
 
