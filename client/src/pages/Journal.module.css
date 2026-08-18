@@ -187,7 +187,7 @@
   cursor: not-allowed;
 }
 
-/* ── Status chips ── */
+
 .statusChip {
   display: inline-flex;
   align-items: center;
